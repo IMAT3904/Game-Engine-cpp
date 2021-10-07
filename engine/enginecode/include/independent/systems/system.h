@@ -4,7 +4,7 @@
 #pragma once
 
 #include <cstdarg>
-
+#include "systems/log.h"
 /**
 \class Interface class for all systems
 */
@@ -19,5 +19,6 @@ namespace Engine {
 		virtual ~System() {};
 		virtual void start(SystemSignal init = SystemSignal::None, ...) = 0; //!< Start the system
 		virtual void stop(SystemSignal close = SystemSignal::None, ...) = 0; //!< Stop the system
+		
 	};
 }
