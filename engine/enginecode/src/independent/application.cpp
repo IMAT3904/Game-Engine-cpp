@@ -4,6 +4,7 @@
 #include "engine_pch.h"
 #include "core/application.h"
 
+
 namespace Engine {
 	// Set static vars
 	Application* Application::s_instance = nullptr;
@@ -43,7 +44,11 @@ namespace Engine {
 			m_timer->reset();
 			if (accumulate > 10)
 			{
+				WindowCloseEvent c;
+				onEvent(c);
 				m_running = false;
+				WindowResizeEvent e(1280, 720);
+				onEvent(e);
 				Log::info("Exiting the application");
 			}
 			
@@ -51,6 +56,26 @@ namespace Engine {
 			lastFrameTime = m_timer->getElapsedTime();
 			accumulate += lastFrameTime;
 		};
+	}
+
+	void Application::onEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.dispatch<WindowResizeEvent>([this](WindowResizeEvent& e)->bool {return this->onWindowResize(e); });
+		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e)->bool {return this->onWindowClose(e); });
+		
+	}
+
+	bool Application::onWindowResize(WindowResizeEvent& e)
+	{
+		Log::info("Window resize event. Width {0}. Height {1}", e.getWidth(), e.getHeight());
+		return true;
+	}
+
+	bool Application::onWindowClose(WindowCloseEvent& e)
+	{
+		Log::info("Window closed");
+		return true;
 	}
 
 }

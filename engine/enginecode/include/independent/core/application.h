@@ -4,6 +4,9 @@
 
 #include "systems/log.h"
 #include "systems/timer.h"
+#include "systems/event.h"
+#include "systems/eventdispatcher.h"
+
 namespace Engine {
 
 	/**
@@ -26,6 +29,9 @@ namespace Engine {
 		virtual ~Application(); //!< Deconstructor
 		inline static Application& getInstance() { return *s_instance; } //!< Instance getter from singleton pattern
 		void run(); //!< Main loop
+		void onEvent(Event& e); //!< Called when an event happens
+		bool onWindowResize(WindowResizeEvent& e);
+		bool onWindowClose(WindowCloseEvent& e);
 	};
 
 	// To be defined in users code
