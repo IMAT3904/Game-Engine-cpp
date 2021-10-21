@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "systems/event.h"
+#include "core/graphicsCotext.h"
 namespace Engine
 {
 
@@ -41,7 +42,7 @@ namespace Engine
 
 		static Window* create(const WindowProperties& porperties = WindowProperties());
 	protected:
-		//std::shared_ptr<GraphicsContext> m_context;
+		std::shared_ptr<GraphicsContext> m_context;
 
 	};
 }

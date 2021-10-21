@@ -2,6 +2,7 @@
 */
 
 #include "engine_pch.h"
+#include <glad/glad.h>
 #include "core/application.h"
 
 #ifdef NG_PLATFORM_WINDOWS
@@ -37,7 +38,10 @@ namespace Engine {
 
 		WindowProperties props("My game window",800,600,0,0);
 		m_window.reset(Window::create(props));
+
+
 		m_window->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
+		InputPoller::setNativeWindow(m_window->getNativeWindow());
 
 
 
@@ -62,24 +66,20 @@ namespace Engine {
 
 	void Application::run()
 	{
-		float accumulate = 0;
-		float lastFrameTime = 0;
+		float timestep = 0.f;
+		glEnable(GL_DEPTH);
+		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 		while (m_running)
 		{
+			timestep = m_timer->getElapsedTime();
 			m_timer->reset();
-			if (accumulate > 10)
-			{
-				WindowCloseEvent c;
-				onEvent(c);
-				m_running = false;
-				WindowResizeEvent e(1280, 720);
-				onEvent(e);
-				Log::info("Exiting the application");
-			}
-			
-			Log::info("last frame {0} accumulate {1}",lastFrameTime, accumulate);
-			lastFrameTime = m_timer->getElapsedTime();
-			accumulate += lastFrameTime;
+
+			glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+
+			if (InputPoller::isKeyPressed(NG_KEY_W))
+				Log::info("W pressed");
+
+			m_window->onUpdate(timestep);
 		};
 	}
 

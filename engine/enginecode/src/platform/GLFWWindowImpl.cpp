@@ -42,11 +42,11 @@ namespace Engine
 		else
 		{
 			m_native = glfwCreateWindow(m_props.width, m_props.height, m_props.title, nullptr, nullptr);
-
 			glfwSetWindowUserPointer(m_native, &m_callback);
 
 		}
-
+		m_graphicsContext.reset(new GLFW_OpenGL_GC(m_native));
+		m_graphicsContext->init();
 
 
 	}
@@ -57,6 +57,7 @@ namespace Engine
 	void GLFWWindowImpl::onUpdate(float timestep)
 	{
 		glfwPollEvents();
+		m_graphicsContext->swapBuffers();
 	}
 	void GLFWWindowImpl::onResize(unsigned int width, unsigned int height)
 	{

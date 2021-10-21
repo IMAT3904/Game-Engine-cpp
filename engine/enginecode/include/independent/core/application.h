@@ -7,6 +7,7 @@
 #include "systems/event.h"
 #include "systems/eventdispatcher.h"
 #include "core/window.h"
+#include "core/inputPoller.h"
 
 namespace Engine {
 
@@ -32,6 +33,7 @@ namespace Engine {
 	public:
 		virtual ~Application(); //!< Deconstructor
 		inline static Application& getInstance() { return *s_instance; } //!< Instance getter from singleton pattern
+		inline std::shared_ptr<Window>& getWindow() { return m_window; };
 		void run(); //!< Main loop
 		void onEvent(Event& e); //!< Called when an event happens
 		bool onWindowResize(WindowResizeEvent& e);

@@ -2,6 +2,11 @@
 #include <functional>
 #include "systems/event.h"
 
+#ifdef NG_PLATFORM_WINDOWS
+#include "systems/GLFWCodes.h"
+#endif // NG_PLATFORM_WINDOWS
+
+
 /**
 \class Event dispatcher
 */

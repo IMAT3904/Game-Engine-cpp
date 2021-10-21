@@ -3,6 +3,7 @@
 
 #include "core/window.h"
 #include <GLFW/glfw3.h>
+#include "platform/GLFW/GLFW_OpenGL_GC.h"
 
 namespace Engine
 {
@@ -32,6 +33,7 @@ namespace Engine
 		WindowProperties m_props;
 		GLFWwindow* m_native;
 		float m_aspectRatio;
+		std::shared_ptr<GraphicsContext> m_graphicsContext;
 	};
 
 }
