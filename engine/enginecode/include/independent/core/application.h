@@ -6,6 +6,7 @@
 #include "systems/timer.h"
 #include "systems/event.h"
 #include "systems/eventdispatcher.h"
+#include "core/window.h"
 
 namespace Engine {
 
@@ -22,6 +23,9 @@ namespace Engine {
 
 		std::shared_ptr<Log> m_logSystem;
 		std::shared_ptr<Timer> m_timer;
+		std::shared_ptr<System> m_windowsSystem; //!< Windows system
+		std::shared_ptr<Window> m_window; //!< Window
+
 	private:
 		static Application* s_instance; //!< Singleton instance of the application
 		bool m_running = true; //!< Is the application running?
