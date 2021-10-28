@@ -24,6 +24,9 @@ namespace Engine
 		static void error(Args&... args);
 
 		template<class ...Args>
+		static void warn(Args&... args);
+
+		template<class ...Args>
 		static void trace(Args&... args);
 
 		static bool running;
@@ -42,6 +45,18 @@ namespace Engine
 	inline void Log::error(Args& ...args)
 	{
 		s_consoleLogger->error(std::forward<Args>(args) ...);
+	}
+
+	template<class ...Args>
+	inline void Log::warn(Args& ...args)
+	{
+		s_consoleLogger->warn(std::forward<Args>(args) ...);
+	}
+
+	template<class ...Args>
+	inline void Log::trace(Args& ...args)
+	{
+		s_consoleLogger->trace(std::forward<Args>(args) ...);
 	}
 
 	template<class ...Args>
