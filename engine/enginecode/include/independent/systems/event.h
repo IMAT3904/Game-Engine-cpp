@@ -78,6 +78,7 @@ namespace Engine
 
 	class WindowFocusEvent : public Event
 	{
+	public:
 		WindowFocusEvent() {}
 		static EventType getStaticType() { return EventType::WindowFocus; }
 		EventType getEventType() const override { return EventType::WindowFocus; }
@@ -90,6 +91,7 @@ namespace Engine
 
 	class WindowLostFocusEvent : public Event
 	{
+	public:
 		WindowLostFocusEvent() {}
 		static EventType getStaticType() { return EventType::WindowLostFocus; }
 		EventType getEventType() const override { return EventType::WindowLostFocus; }

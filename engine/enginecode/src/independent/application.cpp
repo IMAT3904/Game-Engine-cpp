@@ -79,15 +79,30 @@ namespace Engine {
 			if (InputPoller::isKeyPressed(NG_KEY_W))
 				Log::info("W pressed");
 
+
+
 			m_window->onUpdate(timestep);
 		};
-	}
+	}	
 
 	void Application::onEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.dispatch<WindowResizeEvent>([this](WindowResizeEvent& e)->bool {return this->onWindowResize(e); });
 		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e)->bool {return this->onWindowClose(e); });
+		dispatcher.dispatch<WindowFocusEvent>([this](WindowFocusEvent& e)->bool {return this->onWindowFocus(e); });
+		dispatcher.dispatch<WindowMovedEvent>([this](WindowMovedEvent& e)->bool {return this->onWindowMoved(e); });
+
+		dispatcher.dispatch<WindowLostFocusEvent>([this](WindowLostFocusEvent& e)->bool {return this->onWindowLostFocus(e); });
+		dispatcher.dispatch<KeyPressedEvent>([this](KeyPressedEvent& e)->bool {return this->onKeyPressed(e); });
+		dispatcher.dispatch<KeyReleasedEvent>([this](KeyReleasedEvent& e)->bool {return this->onKeyReleased(e); });
+		dispatcher.dispatch<KeyTypedEvent>([this](KeyTypedEvent& e)->bool {return this->onKeyTyped(e); });
+		dispatcher.dispatch<MouseButtonPressedEvent>([this](MouseButtonPressedEvent& e)->bool {return this->onMouseButtonPressed(e); });
+		dispatcher.dispatch<MouseButtonReleasedEvent>([this](MouseButtonReleasedEvent& e)->bool {return this->onMouseButtonReleased(e); });
+		dispatcher.dispatch<MouseMovedEvent>([this](MouseMovedEvent& e)->bool {return this->onMouseMoved(e); });
+		dispatcher.dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& e)->bool {return this->onMouseScrolled(e); });
+
+
 		
 	}
 
@@ -99,8 +114,74 @@ namespace Engine {
 
 	bool Application::onWindowClose(WindowCloseEvent& e)
 	{
+		m_running = false;
 		Log::info("Window closed");
 		return true;
 	}
+
+	bool Application::onWindowFocus(WindowFocusEvent& e)
+	{
+		Log::info("Window Focused");
+		return true;
+	}
+
+	bool Application::onWindowLostFocus(WindowLostFocusEvent& e)
+	{
+		Log::info("Window Lost focus");
+		return true;
+	}
+
+	bool Application::onWindowMoved(WindowMovedEvent& e)
+	{
+		Log::info("Window moved to . Width {0}. Height {1}", e.getxPos(), e.getyPos());
+		return true;
+	}
+
+	bool Application::onKeyPressed(KeyPressedEvent& e)
+	{
+		Log::info("Key  {0} pressed", e.getKeyCode());
+		return true;
+	}
+
+	bool Application::onKeyReleased(KeyReleasedEvent& e)
+	{
+		Log::info("Key  {0} released", e.getKeyCode());
+		return true;
+	}
+
+	bool Application::onKeyTyped(KeyTypedEvent& e)
+	{
+		Log::info("Key  {0} typed", e.getKeyCode());
+		return true;
+	}
+
+	bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		Log::info("Mouse button  {0} pressed", e.getButton());
+		return true;
+	}
+
+	bool Application::onMouseButtonReleased(MouseButtonReleasedEvent& e)
+	{
+		Log::info("Mouse button  {0} released", e.getButton());
+		return true;
+	}
+
+	bool Application::onMouseMoved(MouseMovedEvent& e)
+	{
+		Log::info("Mouse  moved by : Width {0}. Height {1}", e.getXoffset(), e.getYoffset());
+		return true;
+	}
+
+	bool Application::onMouseScrolled(MouseScrolledEvent& e)
+	{
+		Log::info("Mouse  scrolled by : Width {0}. Height {1}", e.getXoffset(), e.getYoffset());
+		return true;
+	}
+
+
+
+
+
 
 }

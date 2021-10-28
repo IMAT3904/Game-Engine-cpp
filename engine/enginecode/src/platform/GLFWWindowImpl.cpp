@@ -30,14 +30,7 @@ namespace Engine
 		{
 			Log::info("Fullscreen not yet implemented");
 
-			glfwSetWindowCloseCallback(m_native,
-				[](GLFWwindow* window)
-			{
-				std::function<void(Event&)>& callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent event;
-				callback(event);
-			}
-			);
+			
 		}
 		else
 		{
@@ -45,9 +38,125 @@ namespace Engine
 			glfwSetWindowUserPointer(m_native, &m_callback);
 
 		}
+		
+		glfwSetWindowCloseCallback(m_native,
+			[](GLFWwindow* window)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			WindowCloseEvent event;
+			callback(event);
+		}
+		);
+
+		glfwSetWindowSizeCallback(m_native,
+			[](GLFWwindow* window, int width, int height)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			WindowResizeEvent event(width,height);
+			callback(event);
+		}
+		);
+
+		glfwSetWindowFocusCallback(m_native,
+			[](GLFWwindow* window, int windowFocused)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			if (windowFocused == GLFW_TRUE)
+			{
+				WindowFocusEvent event;
+				callback(event);
+			}
+			else
+			{
+				WindowLostFocusEvent event;
+				callback(event);
+			}
+		}
+			);
+
+		glfwSetWindowPosCallback(m_native,
+			[](GLFWwindow* window, int newX,int newY)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			WindowMovedEvent event(newX,newY);
+			callback(event);
+		}
+			
+			);
+
+		glfwSetCharCallback(m_native,
+			[](GLFWwindow* window, unsigned int codePoint)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			KeyTypedEvent event(codePoint);
+			callback(event);
+		}
+
+		);
+
+
+
+		glfwSetKeyCallback(m_native,
+			[](GLFWwindow* window, int keycode, int scancode, int action, int mods)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			if (action == GLFW_PRESS)
+			{
+				KeyPressedEvent event(keycode,0);
+				callback(event);
+			}
+			else if (action == GLFW_REPEAT)
+			{
+				KeyPressedEvent event(keycode, 1);
+				callback(event);
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				KeyReleasedEvent event(keycode);
+				callback(event);
+			}
+		}
+		);
 		m_graphicsContext.reset(new GLFW_OpenGL_GC(m_native));
 		m_graphicsContext->init();
 
+
+		glfwSetMouseButtonCallback(m_native,
+			[](GLFWwindow* window, int mouseButton, int action, int mods)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			if (action == GLFW_PRESS)
+			{
+				MouseButtonPressedEvent event(mouseButton);
+				callback(event);
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				MouseButtonReleasedEvent event(mouseButton);
+				callback(event);
+			}
+		}
+			);
+
+		glfwSetCursorPosCallback(m_native,
+			[](GLFWwindow* window, double xPos, double yPos)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			MouseMovedEvent event(xPos, yPos);
+			callback(event);
+		}
+
+			);
+
+		glfwSetScrollCallback(m_native,
+			[](GLFWwindow* window, double xPos, double yPos)
+		{
+			std::function<void(Event&)> callback = *(std::function<void(Event&)>*)glfwGetWindowUserPointer(window);
+			MouseScrolledEvent event(xPos, yPos);
+			callback(event);
+
+		}
+			);
 
 	}
 	void GLFWWindowImpl::close()
@@ -76,5 +185,6 @@ namespace Engine
 	}
 	void GLFWWindowImpl::setEventCallback(const std::function<void(Event&)>& callback)
 	{
+		m_callback = callback;
 	}
 }

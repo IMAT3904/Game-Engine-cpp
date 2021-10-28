@@ -38,6 +38,19 @@ namespace Engine {
 		void onEvent(Event& e); //!< Called when an event happens
 		bool onWindowResize(WindowResizeEvent& e);
 		bool onWindowClose(WindowCloseEvent& e);
+		bool onWindowFocus(WindowFocusEvent& e);
+		bool onWindowLostFocus(WindowLostFocusEvent& e);
+		bool onWindowMoved(WindowMovedEvent& e);
+		bool onKeyPressed(KeyPressedEvent& e);
+		bool onKeyReleased(KeyReleasedEvent& e);
+		bool onKeyTyped(KeyTypedEvent& e);
+		bool onMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool onMouseButtonReleased(MouseButtonReleasedEvent& e);
+		bool onMouseMoved(MouseMovedEvent& e);
+		bool onMouseScrolled(MouseScrolledEvent& e);
+
+
+
 	};
 
 	// To be defined in users code
