@@ -15,9 +15,13 @@
 #include<glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "platform/OpenGL/OpenGLVertexArray.h"
-#include "platform/OpenGL/OpenGLShader.h"
-#include "platform/OpenGL/OpenGLTexture.h"
+#include "rendering/indexBuffer.h"
+#include "rendering/shader.h"
+#include "rendering/texture.h"
+
+#include "rendering/vertexBuffer.h"
+#include "rendering/vertexArray.h"
+
 #include "rendering/subTexture.h"
 
 namespace Engine {
@@ -81,11 +85,11 @@ namespace Engine {
 	{
 #pragma region TEXTURES
 
-		std::shared_ptr<OpenGLTexture> letterTexture;
-		std::shared_ptr<OpenGLTexture> numberTexture;
+		std::shared_ptr<Texture> letterTexture;
+		std::shared_ptr<Texture> numberTexture;
 
-		letterTexture.reset(new OpenGLTexture("assets/textures/letterCube.png"));
-		numberTexture.reset(new OpenGLTexture("assets/textures/numberCube.png"));
+		letterTexture.reset(OpenGLTexture::create("assets/textures/letterCube.png"));
+		numberTexture.reset(OpenGLTexture::create("assets/textures/numberCube.png"));
 
 		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
 		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
@@ -179,29 +183,29 @@ namespace Engine {
 #pragma endregion
 
 #pragma region GL_BUFFERS
-		std::shared_ptr<OpenGLVertexArray> cubeVAO;
-		std::shared_ptr<OpenGLVertexBuffer> cubeVBO;
-		std::shared_ptr<OpenGLIndexBuffer> cubeIBO;
+		std::shared_ptr<VertexArray> cubeVAO;
+		std::shared_ptr<VertexBuffer> cubeVBO;
+		std::shared_ptr<IndexBuffer> cubeIBO;
 
 
-		cubeVAO.reset(new OpenGLVertexArray);
+		cubeVAO.reset(VertexArray::create());
 		
 		BufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(new OpenGLVertexBuffer(cubeVertices,sizeof(cubeVertices), cubeBl));
+		cubeVBO.reset(VertexBuffer::create(cubeVertices,sizeof(cubeVertices), cubeBl));
 
-		cubeIBO.reset(new OpenGLIndexBuffer(cubeIndices, 36));
+		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
 		cubeVAO->setIndexBuffer(cubeIBO);
 
 
-		std::shared_ptr<OpenGLVertexArray> pyramidVAO;
-		std::shared_ptr<OpenGLVertexBuffer> pyramidVBO;
-		std::shared_ptr<OpenGLIndexBuffer> pyramidIBO;
+		std::shared_ptr<VertexArray> pyramidVAO;
+		std::shared_ptr<VertexBuffer> pyramidVBO;
+		std::shared_ptr<IndexBuffer> pyramidIBO;
 
-		pyramidVAO.reset(new OpenGLVertexArray);
+		pyramidVAO.reset(VertexArray::create());
 		BufferLayout pyramidBL = { ShaderDataType::Float3, ShaderDataType::Float3 };
-		pyramidVBO.reset(new OpenGLVertexBuffer(pyramidVertices, sizeof(pyramidVertices), pyramidBL));
-		pyramidIBO.reset(new OpenGLIndexBuffer(pyramidIndices, 18));
+		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), pyramidBL));
+		pyramidIBO.reset(IndexBuffer::create(pyramidIndices, 18));
 		pyramidVAO->addVertexBuffer(pyramidVBO);
 		pyramidVAO->setIndexBuffer(pyramidIBO);
 		
@@ -210,11 +214,11 @@ namespace Engine {
 
 #pragma region SHADERS
 
-		std::shared_ptr<OpenGLShader> fcShader;
-		fcShader.reset(new OpenGLShader("./assets/shaders/flatColor.glsl"));
+		std::shared_ptr<Shader> fcShader;
+		fcShader.reset(Shader::create("./assets/shaders/flatColor.glsl"));
 
-		std::shared_ptr<OpenGLShader> tpShader;
-		tpShader.reset(new OpenGLShader("./assets/shaders/texturedPhong.glsl"));
+		std::shared_ptr<Shader> tpShader;
+		tpShader.reset(Shader::create("./assets/shaders/texturedPhong.glsl"));
 	
 #pragma endregion 
 

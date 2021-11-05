@@ -87,32 +87,32 @@ namespace Engine {
 	{
 		glDeleteProgram(m_OpenGL_ID);
 	}
-	void OpenGLShader::uploadInt(const char* name, int value)
+	void  OpenGLShader::uploadInt(const char* name, int value) const 
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform1i(unifromLocation, value);
 	}
-	void OpenGLShader::uploadFloat(const char* name, float value)
+	void OpenGLShader::uploadFloat(const char* name, float value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform1f(unifromLocation, value);
 	}
-	void OpenGLShader::uploadFloat2(const char* name, glm::vec2& value)
+	void OpenGLShader::uploadFloat2(const char* name, glm::vec2& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform2f(unifromLocation, value.x, value.y);
 	}
-	void OpenGLShader::uploadFloat3(const char* name, glm::vec3& value)
+	void OpenGLShader::uploadFloat3(const char* name, glm::vec3& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform3f(unifromLocation, value.x,value.y,value.z);
 	}
-	void OpenGLShader::uploadFloat4(const char* name, glm::vec4& value)
+	void OpenGLShader::uploadFloat4(const char* name, glm::vec4& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform4f(unifromLocation, value.x, value.y, value.z,value.w);
 	}
-	void OpenGLShader::uploadMat4(const char* name, const glm::mat4& value)
+	void OpenGLShader::uploadMat4(const char* name, const glm::mat4& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniformMatrix4fv(unifromLocation, 1, GL_FALSE, glm::value_ptr(value));

@@ -33,7 +33,7 @@ namespace Engine
 		glDeleteTextures(1, &m_OpenGL_ID);
 	}
 
-	void OpenGLTexture::edit(uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, unsigned char* data)
+	void OpenGLTexture::edit(uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, unsigned char* data) const 
 	{
 		glBindTexture(GL_TEXTURE_2D, m_OpenGL_ID);
 		if (data)
