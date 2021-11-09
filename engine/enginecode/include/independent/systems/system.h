@@ -1,10 +1,9 @@
-/** \file system.h
-*/
+/** \file system.h*/
 
 #pragma once
 
 #include <cstdarg>
-#include "systems/log.h"
+//#include "systems/log.h"
 /**
 \class Interface class for all systems
 */

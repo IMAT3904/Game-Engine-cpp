@@ -3,7 +3,7 @@
 #pragma once
 
 #include "spdlog/spdlog.h"
-#include "system.h"
+#include "systems/system.h"
 #include <iostream>
 
 namespace Engine
@@ -11,8 +11,8 @@ namespace Engine
 	class Log : public System
 	{
 	public:
-		virtual void start(SystemSignal init = SystemSignal::None, ...); //!< Start the logger
-		virtual void stop(SystemSignal close = SystemSignal::None, ...); //!< Stop the logger
+		virtual void start(SystemSignal init = SystemSignal::None, ...) override; //!< Start the logger
+		virtual void stop(SystemSignal close = SystemSignal::None, ...) override; //!< Stop the logger
 
 		template<class ...Args>
 		static void info(Args&&... args);

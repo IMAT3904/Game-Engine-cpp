@@ -4,6 +4,8 @@
 
 #ifdef NG_PLATFORM_WINDOWS
 #include "systems/GLFWCodes.h"
+//#else
+//#include "systems/win32Codes.h"
 #endif // NG_PLATFORM_WINDOWS
 
 

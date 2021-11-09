@@ -6,6 +6,8 @@
 #include "core/application.h"
 
 #ifdef NG_PLATFORM_WINDOWS
+//#include "platform/windows/win32System.h"
+//#else
 #include "platform/GLFW/GLFWSystem.h"
 #endif
 
@@ -46,6 +48,8 @@ namespace Engine {
 
 		//Start windows system
 #ifdef NG_PLATFORM_WINDOWS
+		//m_windowsSystem.reset(new Win32System);
+//#else
 		m_windowsSystem.reset(new GLFWSystem);
 #endif // NG_PLATFORM_WINDOWS
 		m_windowsSystem->start();
