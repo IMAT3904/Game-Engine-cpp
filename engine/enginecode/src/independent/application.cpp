@@ -211,6 +211,9 @@ namespace Engine {
 		letterTexture.reset(Texture::create("assets/textures/letterCube.png"));
 		numberTexture.reset(Texture::create("assets/textures/numberCube.png"));
 
+		unsigned char whitePX[4] = { 255,255,255,255 };
+		std::shared_ptr<Texture> plainWhiteTexture;
+		plainWhiteTexture.reset(Texture::create(1, 1, 4, whitePX));
 		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
 		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
 		
@@ -247,6 +250,9 @@ namespace Engine {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glUseProgram(tpShader->getID());
+
+			glBindTexture(GL_TEXTURE_2D, plainWhiteTexture->getID());
+
 			glBindVertexArray(pyramidVAO->getID());
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pyramidIBO->getRenderID());
 
