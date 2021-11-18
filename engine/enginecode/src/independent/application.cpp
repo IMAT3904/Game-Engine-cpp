@@ -6,17 +6,25 @@
 #include "core/application.h"
 
 #ifdef NG_PLATFORM_WINDOWS
+//#include "platform/windows/win32System.h"
+//#else
 #include "platform/GLFW/GLFWSystem.h"
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
+
 
 #include<glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "platform/OpenGL/OpenGLVertexArray.h"
-#include "platform/OpenGL/OpenGLShader.h"
+#include "rendering/indexBuffer.h"
+#include "rendering/shader.h"
+#include "rendering/texture.h"
+
+#include "rendering/vertexBuffer.h"
+#include "rendering/vertexArray.h"
+
+#include "rendering/subTexture.h"
 
 namespace Engine {
 	// Set static vars
@@ -40,6 +48,8 @@ namespace Engine {
 
 		//Start windows system
 #ifdef NG_PLATFORM_WINDOWS
+		//m_windowsSystem.reset(new Win32System);
+//#else
 		m_windowsSystem.reset(new GLFWSystem);
 #endif // NG_PLATFORM_WINDOWS
 		m_windowsSystem->start();
@@ -77,6 +87,20 @@ namespace Engine {
 
 	void Application::run()
 	{
+#pragma region TEXTURES
+
+		std::shared_ptr<Texture> letterTexture;
+		std::shared_ptr<Texture> numberTexture;
+
+		letterTexture.reset(OpenGLTexture::create("assets/textures/letterCube.png"));
+		numberTexture.reset(OpenGLTexture::create("assets/textures/numberCube.png"));
+
+		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
+		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
+
+
+#pragma endregion
+
 #pragma region RAW_DATA
 
 		float cubeVertices[8 * 24] = {
@@ -163,28 +187,29 @@ namespace Engine {
 #pragma endregion
 
 #pragma region GL_BUFFERS
-		std::shared_ptr<OpenGLVertexArray> cubeVAO;
-		std::shared_ptr<OpenGLVertexBuffer> cubeVBO;
-		std::shared_ptr<OpenGLIndexBuffer> cubeIBO;
+		std::shared_ptr<VertexArray> cubeVAO;
+		std::shared_ptr<VertexBuffer> cubeVBO;
+		std::shared_ptr<IndexBuffer> cubeIBO;
 
 
-		cubeVAO.reset(new OpenGLVertexArray);
+		cubeVAO.reset(VertexArray::create());
 		
 		BufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(new OpenGLVertexBuffer(cubeVertices,sizeof(cubeVertices), cubeBl));
+		cubeVBO.reset(VertexBuffer::create(cubeVertices,sizeof(cubeVertices), cubeBl));
 
-		cubeIBO.reset(new OpenGLIndexBuffer(cubeIndices, 36));
+		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
 		cubeVAO->setIndexBuffer(cubeIBO);
 
 
-		std::shared_ptr<OpenGLVertexArray> pyramidVAO;
-		std::shared_ptr<OpenGLVertexBuffer> pyramidVBO;
-		std::shared_ptr<OpenGLIndexBuffer> pyramidIBO;
+		std::shared_ptr<VertexArray> pyramidVAO;
+		std::shared_ptr<VertexBuffer> pyramidVBO;
+		std::shared_ptr<IndexBuffer> pyramidIBO;
 
-		pyramidVAO.reset(new OpenGLVertexArray);
-		pyramidVBO.reset(new OpenGLVertexBuffer(pyramidVertices, sizeof(pyramidVertices), cubeBl));
-		pyramidIBO.reset(new OpenGLIndexBuffer(pyramidIndices, 18));
+		pyramidVAO.reset(VertexArray::create());
+		BufferLayout pyramidBL = { ShaderDataType::Float3, ShaderDataType::Float3 };
+		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), pyramidBL));
+		pyramidIBO.reset(IndexBuffer::create(pyramidIndices, 18));
 		pyramidVAO->addVertexBuffer(pyramidVBO);
 		pyramidVAO->setIndexBuffer(pyramidIBO);
 		
@@ -193,67 +218,15 @@ namespace Engine {
 
 #pragma region SHADERS
 
+		std::shared_ptr<OpenGLShader> fcShader;
+		fcShader.reset(new OpenGLShader("./assets/shaders/flatColor.glsl"));
+
 		std::shared_ptr<OpenGLShader> tpShader;
 		tpShader.reset(new OpenGLShader("./assets/shaders/texturedPhong.glsl"));
 	
 #pragma endregion 
 
-#pragma region TEXTURES
 
-		uint32_t letterTexture, numberTexture;
-
-		glGenTextures(1, &letterTexture);
-		glBindTexture(GL_TEXTURE_2D, letterTexture);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		int width, height, channels;
-
-		/* Need to add
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-*/
-		unsigned char* data = stbi_load("assets/textures/letterCube.png", &width, &height, &channels, 0);
-		if (data)
-		{
-			if (channels == 3) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			else if (channels == 4) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			else return;
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			return;
-		}
-		stbi_image_free(data);
-
-		glGenTextures(1, &numberTexture);
-		glBindTexture(GL_TEXTURE_2D, numberTexture);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		data = stbi_load("assets\\textures\\numberCube.png", &width, &height, &channels, 0);
-		if (data)
-		{
-			if (channels == 3) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			else if (channels == 4) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			else return;
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			return;
-		}
-		stbi_image_free(data);
-#pragma endregion
 
 		glm::mat4 view = glm::lookAt(
 			glm::vec3(0.f, 0.f, 0.f),
@@ -313,7 +286,7 @@ namespace Engine {
 			tpShader->uploadFloat4("u_tint", glm::vec4(1.f,1.f,1.f,1.f ));
 
 
-			glBindTexture(GL_TEXTURE_2D, letterTexture);
+			glBindTexture(GL_TEXTURE_2D, letterTexture->getID());
 			uniformLocation = glGetUniformLocation(tpShader->getID(), "u_texData");
 			glUniform1i(uniformLocation, 0);
 
@@ -322,7 +295,7 @@ namespace Engine {
 			uniformLocation = glGetUniformLocation(tpShader->getID(), "u_model");
 			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(models[2]));
 
-			glBindTexture(GL_TEXTURE_2D, numberTexture);
+			glBindTexture(GL_TEXTURE_2D, numberTexture->getID());
 
 			glDrawElements(GL_TRIANGLES, cubeVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
 			
@@ -331,8 +304,6 @@ namespace Engine {
 
 
 
-		glDeleteTextures(1, &letterTexture);
-		glDeleteTextures(1, &numberTexture);
 
 	}
 

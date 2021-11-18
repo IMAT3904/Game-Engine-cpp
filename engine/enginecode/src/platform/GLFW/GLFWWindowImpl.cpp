@@ -6,15 +6,6 @@
 
 namespace Engine 
 {
-#ifdef NG_PLATFORM_WINDOWS
-	Window* Window::create(const WindowProperties& properties)
-	{
-		return new GLFWWindowImpl(properties);
-	}
-
-#endif
-
-	
 	GLFWWindowImpl::GLFWWindowImpl(const WindowProperties& properties)
 	{
 		init(properties);

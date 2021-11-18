@@ -26,16 +26,7 @@ namespace Engine {
 		std::shared_ptr<Timer> m_timer;
 		std::shared_ptr<System> m_windowsSystem; //!< Windows system
 		std::shared_ptr<Window> m_window; //!< Window
-
-	private:
-		static Application* s_instance; //!< Singleton instance of the application
-		bool m_running = true; //!< Is the application running?
-	public:
-		virtual ~Application(); //!< Deconstructor
-		inline static Application& getInstance() { return *s_instance; } //!< Instance getter from singleton pattern
-		inline std::shared_ptr<Window>& getWindow() { return m_window; };
-		void run(); //!< Main loop
-		void onEvent(Event& e); //!< Called when an event happens
+				void onEvent(Event& e); //!< Called when an event happens
 		bool onWindowResize(WindowResizeEvent& e);
 		bool onWindowClose(WindowCloseEvent& e);
 		bool onWindowFocus(WindowFocusEvent& e);
@@ -48,6 +39,16 @@ namespace Engine {
 		bool onMouseButtonReleased(MouseButtonReleasedEvent& e);
 		bool onMouseMoved(MouseMovedEvent& e);
 		bool onMouseScrolled(MouseScrolledEvent& e);
+	private:
+		static Application* s_instance; //!< Singleton instance of the application
+		bool m_running = true; //!< Is the application running?
+	public:
+		virtual ~Application(); //!< Deconstructor
+		inline static Application& getInstance() { return *s_instance; } //!< Instance getter from singleton pattern
+		inline std::shared_ptr<Window>& getWindow() { return m_window; };
+		void run(); //!< Main loop
+
+
 
 
 

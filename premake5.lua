@@ -117,6 +117,10 @@ project "Sandbox"
 		{
 			"NG_PLATFORM_WINDOWS"
 		}
+		links
+		{
+			"opengl32.lib"
+		}
 
 	filter "configurations:Debug"
 		defines "NG_DEBUG"
