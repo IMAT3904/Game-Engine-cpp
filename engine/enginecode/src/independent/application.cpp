@@ -6,8 +6,6 @@
 #include "core/application.h"
 
 #ifdef NG_PLATFORM_WINDOWS
-//#include "platform/windows/win32System.h"
-//#else
 #include "platform/GLFW/GLFWSystem.h"
 #endif
 
@@ -48,13 +46,11 @@ namespace Engine {
 
 		//Start windows system
 #ifdef NG_PLATFORM_WINDOWS
-		//m_windowsSystem.reset(new Win32System);
-//#else
 		m_windowsSystem.reset(new GLFWSystem);
 #endif // NG_PLATFORM_WINDOWS
 		m_windowsSystem->start();
 
-		WindowProperties props("My game window",800,600,0,0);
+		WindowProperties props("My game window", 800, 600, 0, 0);
 		m_window.reset(Window::create(props));
 
 
@@ -87,20 +83,6 @@ namespace Engine {
 
 	void Application::run()
 	{
-#pragma region TEXTURES
-
-		std::shared_ptr<Texture> letterTexture;
-		std::shared_ptr<Texture> numberTexture;
-
-		letterTexture.reset(OpenGLTexture::create("assets/textures/letterCube.png"));
-		numberTexture.reset(OpenGLTexture::create("assets/textures/numberCube.png"));
-
-		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
-		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
-
-
-#pragma endregion
-
 #pragma region RAW_DATA
 
 		float cubeVertices[8 * 24] = {
@@ -193,9 +175,9 @@ namespace Engine {
 
 
 		cubeVAO.reset(VertexArray::create());
-		
+
 		BufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(VertexBuffer::create(cubeVertices,sizeof(cubeVertices), cubeBl));
+		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), cubeBl));
 
 		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
@@ -207,26 +189,32 @@ namespace Engine {
 		std::shared_ptr<IndexBuffer> pyramidIBO;
 
 		pyramidVAO.reset(VertexArray::create());
-		BufferLayout pyramidBL = { ShaderDataType::Float3, ShaderDataType::Float3 };
-		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), pyramidBL));
+		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), cubeBl));
 		pyramidIBO.reset(IndexBuffer::create(pyramidIndices, 18));
 		pyramidVAO->addVertexBuffer(pyramidVBO);
 		pyramidVAO->setIndexBuffer(pyramidIBO);
-		
+
 #pragma endregion
 
 
 #pragma region SHADERS
 
-		std::shared_ptr<OpenGLShader> fcShader;
-		fcShader.reset(new OpenGLShader("./assets/shaders/flatColor.glsl"));
+		std::shared_ptr<Shader> tpShader;
+		tpShader.reset(Shader::create("./assets/shaders/texturedPhong.glsl"));
 
-		std::shared_ptr<OpenGLShader> tpShader;
-		tpShader.reset(new OpenGLShader("./assets/shaders/texturedPhong.glsl"));
-	
 #pragma endregion 
 
+#pragma region TEXTURES
+		std::shared_ptr<Texture> letterTexture;
+		std::shared_ptr<Texture> numberTexture;
 
+		letterTexture.reset(Texture::create("assets/textures/letterCube.png"));
+		numberTexture.reset(Texture::create("assets/textures/numberCube.png"));
+
+		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
+		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
+		
+#pragma endregion
 
 		glm::mat4 view = glm::lookAt(
 			glm::vec3(0.f, 0.f, 0.f),
@@ -273,17 +261,17 @@ namespace Engine {
 			tpShader->uploadFloat3("u_viewPos", glm::vec3(0.f, 0.f, 0.f));
 			tpShader->uploadFloat4("u_tint", glm::vec4(0.3f, 0.9f, 4.f, 1.f));
 			glDrawElements(GL_TRIANGLES, pyramidVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
-			
 
 
-			
+
+
 			glBindVertexArray(cubeVAO->getID());
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIBO->getRenderID());
 
 
 
 			tpShader->uploadMat4("u_model", models[1]);
-			tpShader->uploadFloat4("u_tint", glm::vec4(1.f,1.f,1.f,1.f ));
+			tpShader->uploadFloat4("u_tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
 
 
 			glBindTexture(GL_TEXTURE_2D, letterTexture->getID());
@@ -298,11 +286,9 @@ namespace Engine {
 			glBindTexture(GL_TEXTURE_2D, numberTexture->getID());
 
 			glDrawElements(GL_TRIANGLES, cubeVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
-			
+
 			m_window->onUpdate(timestep);
 		}
-
-
 
 
 	}
@@ -326,7 +312,7 @@ namespace Engine {
 		dispatcher.dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& e)->bool {return this->onMouseScrolled(e); });
 
 
-		
+
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& e)
