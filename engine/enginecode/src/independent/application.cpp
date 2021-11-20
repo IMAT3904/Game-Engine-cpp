@@ -254,7 +254,7 @@ namespace Engine {
 			glBindTexture(GL_TEXTURE_2D, plainWhiteTexture->getID());
 
 			glBindVertexArray(pyramidVAO->getID());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pyramidIBO->getRenderID());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pyramidIBO->getID());
 
 			GLuint uniformLocation;
 
@@ -272,7 +272,7 @@ namespace Engine {
 
 
 			glBindVertexArray(cubeVAO->getID());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIBO->getRenderID());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIBO->getID());
 
 
 
