@@ -24,6 +24,8 @@
 
 #include "rendering/subTexture.h"
 
+
+#include "rendering/Renderer3D.h"
 namespace Engine {
 	// Set static vars
 	Application* Application::s_instance = nullptr;
@@ -219,6 +221,20 @@ namespace Engine {
 		
 #pragma endregion
 
+#pragma region MATERIALS
+
+		std::shared_ptr<Material> pyramidMat;
+		std::shared_ptr<Material> letterCubeMat;
+		std::shared_ptr<Material> numberCubeMat;
+
+		pyramidMat.reset(new Material(tpShader, { 0.3f, 0.9f, 4.f, 1.f }));
+		letterCubeMat.reset(new Material(tpShader, letterTexture));
+		numberCubeMat.reset(new Material(tpShader, numberTexture));
+		
+
+
+#pragma endregion
+
 		glm::mat4 view = glm::lookAt(
 			glm::vec3(0.f, 0.f, 0.f),
 			glm::vec3(0.f, 0.f, -1.f),
@@ -231,10 +247,24 @@ namespace Engine {
 		models[1] = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -6.f));
 		models[2] = glm::translate(glm::mat4(1.0f), glm::vec3(2.f, 0.f, -6.f));
 
+		SceneWideUniforms swu3D;
+
+		glm::vec3 lightData[3] = { {1.f, 1.f, 1.f}, {-2.f, 4.f, 6.f}, {0.f, 0.f, 0.f} };
+
+		swu3D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view)));
+		swu3D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection)));
+		swu3D["u_lightColour"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[0])));
+		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
+		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[2])));
+
+
+
 		float timestep = 0.f;
 
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+		Renderer3D::init();
 		while (m_running)
 		{
 			timestep = m_timer->getElapsedTime();
@@ -244,54 +274,19 @@ namespace Engine {
 			//if (InputPoller::isMouseButtonPressed(NG_MOUSE_BUTTON_1)) Log::error("Left Mouse Button Pressed");
 			//Log::trace("Current mouse pos: ({0}, {1})", InputPoller::getMouseX(), InputPoller::getMouseY());
 
+			GLuint uniformLocation;
 			for (auto& model : models) { model = glm::rotate(model, timestep, glm::vec3(0.f, 1.0, 0.f)); }
 
 			// Do frame stuff
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glUseProgram(tpShader->getID());
+			Renderer3D::begin(swu3D);
 
-			glBindTexture(GL_TEXTURE_2D, plainWhiteTexture->getID());
+			Renderer3D::submit(pyramidVAO, pyramidMat, models[0]);
+			Renderer3D::submit(cubeVAO, letterCubeMat, models[1]);
+			Renderer3D::submit(cubeVAO, numberCubeMat, models[2]);
 
-			glBindVertexArray(pyramidVAO->getID());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pyramidIBO->getID());
-
-			GLuint uniformLocation;
-
-
-			tpShader->uploadMat4("u_model", models[0]);
-			tpShader->uploadMat4("u_view", view);
-			tpShader->uploadMat4("u_projection", projection);
-			tpShader->uploadFloat3("u_lightColour", glm::vec3(1.f, 1.f, 1.f));
-			tpShader->uploadFloat3("u_lightPos", glm::vec3(1.f, 4.f, 6.f));
-			tpShader->uploadFloat3("u_viewPos", glm::vec3(0.f, 0.f, 0.f));
-			tpShader->uploadFloat4("u_tint", glm::vec4(0.3f, 0.9f, 4.f, 1.f));
-			glDrawElements(GL_TRIANGLES, pyramidVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
-
-
-
-
-			glBindVertexArray(cubeVAO->getID());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIBO->getID());
-
-
-
-			tpShader->uploadMat4("u_model", models[1]);
-			tpShader->uploadFloat4("u_tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
-
-
-			glBindTexture(GL_TEXTURE_2D, letterTexture->getID());
-			uniformLocation = glGetUniformLocation(tpShader->getID(), "u_texData");
-			glUniform1i(uniformLocation, 0);
-
-			glDrawElements(GL_TRIANGLES, cubeVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
-
-			uniformLocation = glGetUniformLocation(tpShader->getID(), "u_model");
-			glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(models[2]));
-
-			glBindTexture(GL_TEXTURE_2D, numberTexture->getID());
-
-			glDrawElements(GL_TRIANGLES, cubeVAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer3D::end();
 
 			m_window->onUpdate(timestep);
 		}
