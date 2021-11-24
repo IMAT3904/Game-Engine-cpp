@@ -261,7 +261,7 @@ namespace Engine {
 
 		float timestep = 0.f;
 
-		glEnable(GL_DEPTH_TEST);
+	
 		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
@@ -280,13 +280,17 @@ namespace Engine {
 			// Do frame stuff
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			Renderer3D::begin(swu3D);
-
+			
+			/*Renderer3D::begin(swu3D);
+			glEnable(GL_DEPTH_TEST);
 			Renderer3D::submit(pyramidVAO, pyramidMat, models[0]);
 			Renderer3D::submit(cubeVAO, letterCubeMat, models[1]);
 			Renderer3D::submit(cubeVAO, numberCubeMat, models[2]);
 
-			Renderer3D::end();
+			Renderer3D::end();*/
+
+			glDisable(GL_DEPTH_TEST);
+
 
 			m_window->onUpdate(timestep);
 		}

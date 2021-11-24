@@ -1,18 +1,16 @@
 #pragma once
 /* \file Renderer3D.h */
 
-#include <unordered_map>
-#include <glm/glm.hpp>
-#include <memory>
-#include "rendering/texture.h"
-#include "rendering/shader.h"
+
+
+
 #include "rendering/RenderAPI.h"
-#include "rendering/shaderDataType.h"
-#include "vertexArray.h"
+#include "RendererCommon.h"
+
 
 namespace Engine
 {
-	using SceneWideUniforms = std::unordered_map<const char*, std::pair<ShaderDataType, void*>>;
+
 
 	/* \class Material
 	* \brief hold a shader and the uniform data associated with that shader
