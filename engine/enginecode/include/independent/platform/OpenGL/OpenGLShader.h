@@ -18,9 +18,9 @@ namespace Engine
 
 		virtual void uploadInt(const char* name, int value) const override;
 		virtual void uploadFloat(const char* name, float value) const override;
-		virtual void uploadFloat2(const char* name, glm::vec2& value) const override;
-		virtual void uploadFloat3(const char* name, glm::vec3& value) const override;
-		virtual void uploadFloat4(const char* name, glm::vec4& value) const override;
+		virtual void uploadFloat2(const char* name, const glm::vec2& value) const override;
+		virtual void uploadFloat3(const char* name, const glm::vec3& value) const override;
+		virtual void uploadFloat4(const char* name, const glm::vec4& value) const override;
 		virtual void uploadMat4(const char* name, const glm::mat4& value) const override;
 	private:
 		uint32_t m_OpenGL_ID;

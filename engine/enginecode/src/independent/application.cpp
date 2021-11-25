@@ -26,6 +26,8 @@
 
 
 #include "rendering/Renderer3D.h"
+#include "rendering/Renderer2D.h"
+
 namespace Engine {
 	// Set static vars
 	Application* Application::s_instance = nullptr;
@@ -52,7 +54,7 @@ namespace Engine {
 #endif // NG_PLATFORM_WINDOWS
 		m_windowsSystem->start();
 
-		WindowProperties props("My game window", 800, 600, 0, 0);
+		WindowProperties props("My game window", 1024, 800, 0, 0);
 		m_window.reset(Window::create(props));
 
 
@@ -247,6 +249,9 @@ namespace Engine {
 		models[1] = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -6.f));
 		models[2] = glm::translate(glm::mat4(1.0f), glm::vec3(2.f, 0.f, -6.f));
 
+		glm::mat4 view2D = glm::mat4(1.f);
+		glm::mat4 projection2D = glm::ortho(0.f, static_cast<float>(m_window->getWidth()), static_cast<float>(m_window->getHeight()),0.f);
+
 		SceneWideUniforms swu3D;
 
 		glm::vec3 lightData[3] = { {1.f, 1.f, 1.f}, {-2.f, 4.f, 6.f}, {0.f, 0.f, 0.f} };
@@ -257,7 +262,9 @@ namespace Engine {
 		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
 		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[2])));
 
-
+		SceneWideUniforms swu2D;
+		swu2D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view2D)));
+		swu2D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection2D)));
 
 		float timestep = 0.f;
 
@@ -265,6 +272,19 @@ namespace Engine {
 		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
+		Renderer2D::init();
+
+		Quad quads[3] =
+		{
+			Quad::createCentreHalfExtents({ 400, 200 }, { 100.f, 50.f }),
+			Quad::createCentreHalfExtents({ 200, 300 }, { 50, 100.f }),
+			Quad::createCentreHalfExtents({ 500, 500 }, { 75, 75.f }),
+
+		};
+			
+
+
+
 		while (m_running)
 		{
 			timestep = m_timer->getElapsedTime();
@@ -281,16 +301,25 @@ namespace Engine {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			
-			/*Renderer3D::begin(swu3D);
+			Renderer3D::begin(swu3D);
 			glEnable(GL_DEPTH_TEST);
 			Renderer3D::submit(pyramidVAO, pyramidMat, models[0]);
 			Renderer3D::submit(cubeVAO, letterCubeMat, models[1]);
 			Renderer3D::submit(cubeVAO, numberCubeMat, models[2]);
 
-			Renderer3D::end();*/
+			Renderer3D::end();
 
 			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+			Renderer2D::begin(swu2D);
+			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
+			Renderer2D::submit(quads[1], letterTexture);
+			Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
+			Renderer2D::end();
+
+			glDisable(GL_BLEND);
 
 			m_window->onUpdate(timestep);
 		}

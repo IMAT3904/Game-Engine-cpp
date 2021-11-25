@@ -26,7 +26,7 @@ namespace Engine
 	private:
 		uint32_t m_OpenGL_ID; //!< Render ID
 		uint32_t m_attributeIndex = 0; //!< Atribute Index
-		std::vector<std::shared_ptr<IndexBuffer>> m_vertexBuffer;
+		std::vector<std::shared_ptr<VertexBuffer>> m_vertexBuffers;
 		std::shared_ptr<IndexBuffer> m_indexBuffer;
 	};
 }

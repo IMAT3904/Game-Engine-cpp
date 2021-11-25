@@ -97,17 +97,17 @@ namespace Engine {
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform1f(unifromLocation, value);
 	}
-	void OpenGLShader::uploadFloat2(const char* name, glm::vec2& value) const
+	void OpenGLShader::uploadFloat2(const char* name, const glm::vec2& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform2f(unifromLocation, value.x, value.y);
 	}
-	void OpenGLShader::uploadFloat3(const char* name, glm::vec3& value) const
+	void OpenGLShader::uploadFloat3(const char* name, const glm::vec3& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform3f(unifromLocation, value.x,value.y,value.z);
 	}
-	void OpenGLShader::uploadFloat4(const char* name, glm::vec4& value) const
+	void OpenGLShader::uploadFloat4(const char* name, const glm::vec4& value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform4f(unifromLocation, value.x, value.y, value.z,value.w);

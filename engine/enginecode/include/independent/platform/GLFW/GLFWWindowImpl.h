@@ -22,8 +22,8 @@ namespace Engine
 		virtual void onResize(unsigned int width, unsigned int height) override;
 		virtual void setVsync(bool vSync) override;
 		virtual void setEventCallback(const std::function<void(Event&)>& callback) override;
-		virtual inline unsigned int getWidth() const override { return m_props.height; };
-		virtual inline unsigned int getHeight() const override { return m_props.width; };
+		virtual inline unsigned int getWidth() const override { return m_props.width; };
+		virtual inline unsigned int getHeight() const override { return m_props.height; };
 		virtual inline void* getNativeWindow() const  override { return m_native; };
 		virtual inline bool isFullScreenMode() const  override { return m_props.isFullScreen; };
 		virtual inline bool isVSync() const override { return m_props.isVsync; };
