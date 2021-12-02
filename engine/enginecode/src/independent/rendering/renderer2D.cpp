@@ -15,6 +15,9 @@ namespace Engine
 	{
 		s_data.reset(new InternalData);
 
+
+
+
 		unsigned char whitePX[4] = { 255,255,255,255 };
 		s_data->defaultTexture.reset(Texture::create(1, 1, 4, whitePX));
 
@@ -60,14 +63,93 @@ namespace Engine
 		int32_t charSize = 86;
 		if (FT_Set_Pixel_Sizes(s_data->fontFace, 0, charSize)) Log::error("Error: freetype can't set font size: {0}", charSize);
 
-		//Init font texture
-		s_data->fontTexture.reset(Texture::create(s_data->glyphBUfferDims.x, s_data->glyphBUfferDims.y, 4, nullptr));
+		s_data->first_char = ' ';
+		s_data->last_char = '~';
 
-		//Fill the glyph buffer
-		memset(s_data->glyphBuffer.get(), 60, s_data->glyphBufferSize);
+		//Do a big texture for all characters
+
+		int32_t charCount = s_data->last_char - s_data->first_char;
+
+		uint32_t maxCharWidth = 0, maxCharHeight = 0;
+
+
+		for (unsigned char c = s_data->first_char; c <= s_data->last_char; c++)
+		{
+			//Get glyph from freetype
+			if (FT_Load_Char(s_data->fontFace, c, FT_LOAD_RENDER)) Log::error("Error: Could not load glyph for char{0}", c);
+			else
+			{
+				//Get glyph data
+				uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
+				uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
+
+				maxCharWidth = std::max(maxCharWidth, glyphWidth);
+				maxCharHeight = std::max(maxCharHeight, glyphHeight);
+			}
+		}
+
+		maxCharWidth += 10;
+		maxCharHeight += 10;
+		uint32_t textureWidth =maxCharWidth*10, textureHeight=maxCharHeight*10;
+
+
+		unsigned char* texData = static_cast<unsigned char*>(malloc(textureWidth * textureHeight * 4 * sizeof(unsigned char)));
+
+		memset(texData, 0, textureWidth * textureHeight * 4);
+
+		//Init font texture
+		s_data->fontTexture.reset(Texture::create(textureWidth, textureHeight, 4, texData));
+
+		free(texData);
+
+		for (unsigned char c = s_data->first_char; c <= s_data->last_char; c++)
+		{
+			//Get glyph from freetype
+			if (FT_Load_Char(s_data->fontFace, c, FT_LOAD_RENDER)) Log::error("Error: Could not load glyph for char{0}", c);
+			else
+			{
+				CharacterData cData;
+				//Get glyph data
+				uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
+				uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
+
+				cData.glyphSize = glm::vec2(glyphWidth, glyphHeight);
+				cData.glyphBearing = glm::vec2(s_data->fontFace->glyph->bitmap_left, -s_data->fontFace->glyph->bitmap_top);
+
+
+				//Calculate the advance
+				cData.advance = static_cast<float>(s_data->fontFace->glyph->advance.x >> 6);
+
+				//Calculate the quad for the glyph
+				/*glm::vec2 glyphHalfExtents = glm::vec2(s_data->fontTexture->getWidthf() * 0.5f, s_data->fontTexture->getHeight() * 0.5f);
+				glm::vec2 glyphCentre = (position + glyphBearing) + glyphHalfExtents;
+
+				Quad quad = Quad::createCentreHalfExtents(glyphCentre, glyphHalfExtents);*/
+
+				uint32_t texPosX = (c - s_data->first_char) / 10;
+				uint32_t texPosY = (c - s_data->first_char) % 10;
+				texPosX *= maxCharWidth;
+				texPosY *= maxCharHeight;
+
+				unsigned char* glyphRGBABuffer = rtoRGBA(s_data->fontFace->glyph->bitmap.buffer, glyphWidth, glyphHeight);
+				s_data->fontTexture->edit(texPosX, texPosY, glyphWidth, glyphHeight, glyphRGBABuffer);
+				free(glyphRGBABuffer);
+
+				glm::vec2 uvStart(texPosX / textureWidth, texPosY /textureHeight);
+				glm::vec2 uvEnd((texPosX +glyphWidth) / textureWidth, (texPosY +glyphHeight) /textureHeight);
+
+				cData.subTexture = SubTexture(s_data->fontTexture, uvStart, uvEnd);
+
+				s_data->charactersData[c] = cData;
+				//Submit quad
+				//submit(quad, tint, s_data->fontTexture);
+			}
+		}
+
+		
 
 		// Send glyph buffer to the texture on the GPU
-		s_data->fontTexture->edit(0, 0, s_data->glyphBUfferDims.x, s_data->glyphBUfferDims.y, s_data->glyphBuffer.get());
+		//s_data->fontTexture->edit(0, 0, s_data->glyphBUfferDims.x, s_data->glyphBUfferDims.y, s_data->glyphBuffer.get());
 
 	}
 	void Renderer2D::begin(const SceneWideUniforms& swu)
@@ -111,6 +193,10 @@ namespace Engine
 	{
 		Renderer2D::submit(quad, s_data->defaultTint, texture);
 	}
+	void Renderer2D::submit(const Quad& quad, const SubTexture& subtexture)
+	{
+		Renderer2D::submit(quad, s_data->defaultTint, subtexture);
+	}
 	void Renderer2D::submit(const Quad& quad, const std::shared_ptr<Texture>& texture, float angle, bool degrees)
 	{
 		Renderer2D::submit(quad, s_data->defaultTint, texture,angle,degrees);
@@ -118,6 +204,17 @@ namespace Engine
 	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const std::shared_ptr<Texture>& texture)
 	{
 		glBindTexture(GL_TEXTURE_2D, texture->getID());
+		s_data->model = glm::scale(glm::translate(glm::mat4(1.f), quad.m_translate), quad.m_scale);
+
+		s_data->shader->uploadInt("u_texData", 0);
+		s_data->shader->uploadFloat4("u_tint", tint);
+		s_data->shader->uploadMat4("u_model", s_data->model);
+
+		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
+	}
+	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const SubTexture& subtexture)
+	{
+		glBindTexture(GL_TEXTURE_2D, subtexture.getBaseTexture()->getID());
 		s_data->model = glm::scale(glm::translate(glm::mat4(1.f), quad.m_translate), quad.m_scale);
 
 		s_data->shader->uploadInt("u_texData", 0);
@@ -146,33 +243,44 @@ namespace Engine
 	}
 	void Renderer2D::submit(char ch, const glm::vec2& position, float& advance, const glm::vec4 tint)
 	{
-		//Get glyph from freetype
-		if (FT_Load_Char(s_data->fontFace, ch, FT_LOAD_RENDER)) Log::error("Error: Could not load glyph for char{0}", ch);
-		else
-		{
-			//Get glyph data
-			uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
-			uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
-			glm::vec2 glyphSize(glyphWidth, glyphHeight);
-			glm::vec2 glyphBearing(s_data->fontFace->glyph->bitmap_left, -s_data->fontFace->glyph->bitmap_top);
+		////Get glyph from freetype
+		//if (FT_Load_Char(s_data->fontFace, ch, FT_LOAD_RENDER)) Log::error("Error: Could not load glyph for char{0}", ch);
+		//else
+		//{
+		//	//Get glyph data
+		//	uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
+		//	uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
+		//	glm::vec2 glyphSize(glyphWidth, glyphHeight);
+		//	glm::vec2 glyphBearing(s_data->fontFace->glyph->bitmap_left, -s_data->fontFace->glyph->bitmap_top);
 
-			//Calculate the advance
-			advance = static_cast<float>(s_data->fontFace->glyph->advance.x >> 6);
+		//	//Calculate the advance
+		//	advance = static_cast<float>(s_data->fontFace->glyph->advance.x >> 6);
 
-			//Calculate the quad for the glyph
-			glm::vec2 glyphHalfExtents = glm::vec2(s_data->fontTexture->getWidthf() * 0.5f, s_data->fontTexture->getHeight() * 0.5f);
-			glm::vec2 glyphCentre = (position + glyphBearing) + glyphHalfExtents;
+		//	//Calculate the quad for the glyph
+		//	glm::vec2 glyphHalfExtents = glm::vec2(s_data->fontTexture->getWidthf() * 0.5f, s_data->fontTexture->getHeight() * 0.5f);
+		//	glm::vec2 glyphCentre = (position + glyphBearing) + glyphHalfExtents;
 
-			Quad quad = Quad::createCentreHalfExtents(glyphCentre, glyphHalfExtents);
+		//	Quad quad = Quad::createCentreHalfExtents(glyphCentre, glyphHalfExtents);
 
-			unsigned char* glyphRGBABuffer = rtoRGBA(s_data->fontFace->glyph->bitmap.buffer, glyphWidth, glyphHeight);
-			s_data->fontTexture->edit(0, 0, glyphWidth, glyphHeight, glyphRGBABuffer);
-			free(glyphRGBABuffer);
+		//	unsigned char* glyphRGBABuffer = rtoRGBA(s_data->fontFace->glyph->bitmap.buffer, glyphWidth, glyphHeight);
+		//	s_data->fontTexture->edit(0, 0, glyphWidth, glyphHeight, glyphRGBABuffer);
+		//	free(glyphRGBABuffer);
 
-			//Submit quad
-			submit(quad, tint, s_data->fontTexture);
-		}
+		//	//Submit quad
+		//	submit(quad, tint, s_data->fontTexture);
+		//}
+		//Quad quad = Quad::createCentreHalfExtents({ 512,400 }, { 400,400 });
+		//submit(quad, glm::vec4(1), s_data->fontTexture);
+		
+		auto& cData = s_data->charactersData[ch];
 
+		glm::vec2 centre = position + cData.glyphBearing + cData.glyphSize * 0.5f;
+		glm::vec2 he = cData.glyphSize * 0.5f;
+		
+		Quad quad = Quad::createCentreHalfExtents(centre, he);
+
+
+		submit(quad, tint, cData.subTexture);
 	}
 	void Renderer2D::end()
 	{

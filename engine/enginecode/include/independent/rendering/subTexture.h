@@ -23,6 +23,7 @@ namespace Engine
 		float transformU(float U); //!< Transform original to atlased co-ords
 		float transformV(float V);
 		glm::vec2 transformUV(glm::vec2 UV);
+		inline std::shared_ptr<Texture> getBaseTexture()const  { return m_texture; };
 	private:
 		std::shared_ptr<Texture> m_texture;
 		glm::vec2 m_UVStart;

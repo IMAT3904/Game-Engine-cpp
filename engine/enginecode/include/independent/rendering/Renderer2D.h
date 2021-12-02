@@ -6,6 +6,8 @@
 
 #include <ft2build.h>
 #include "freetype/freetype.h"
+#include "rendering/subTexture.h"
+#include <unordered_map>
 
 namespace Engine
 {
@@ -24,6 +26,16 @@ namespace Engine
 	** \brief Class which allows the rendering of simple 2D primitives
 	*/
 
+	struct CharacterData
+	{
+		//The glyph data
+
+		glm::vec2 glyphSize;
+		glm::vec2 glyphBearing;
+		float advance;
+		SubTexture subTexture;
+	};
+
 	class Renderer2D
 	{
 	public:
@@ -31,6 +43,8 @@ namespace Engine
 		static void begin(const SceneWideUniforms& swu); //!< Begin a 2D scene
 		static void submit(const Quad& quad, const glm::vec4& tint); //!< Render a tinted quad;
 		static void submit(const Quad& quad, const std::shared_ptr<Texture>& texture); //!< Render a textured quad;
+		static void submit(const Quad& quad, const SubTexture& subtexture); //!< Render a textured quad with subtexture;
+		static void submit(const Quad& quad, const glm::vec4& tint  ,const SubTexture& subtexture ); //!< Render a textured quad with subtexture and tint;
 		static void submit(const Quad& quad, const std::shared_ptr<Texture>& texture, float angle, bool degrees = false); //!< Render a textured quad;
 		static void submit(const Quad& quad, const glm::vec4& tint, const std::shared_ptr<Texture>& texture); //!< Render a textured and tinted quad;
 		static void submit(const Quad& quad, const glm::vec4& tint, float angle, bool degrees = false); //!< Render a textured and tinted quad;
@@ -53,6 +67,9 @@ namespace Engine
 			glm::ivec2 glyphBUfferDims;
 			uint32_t glyphBufferSize;
 			std::shared_ptr<unsigned char> glyphBuffer;
+			unsigned char first_char;
+			unsigned char last_char;
+			std::unordered_map<unsigned char, CharacterData> charactersData;
 		};
 
 		static std::shared_ptr<InternalData> s_data;
