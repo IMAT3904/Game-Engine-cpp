@@ -274,6 +274,9 @@ namespace Engine {
 		Renderer3D::init();
 		Renderer2D::init();
 
+		float advance;
+
+
 		Quad quads[3] =
 		{
 			Quad::createCentreHalfExtents({ 400, 200 }, { 100.f, 50.f }),
@@ -317,6 +320,8 @@ namespace Engine {
 			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
 			Renderer2D::submit(quads[1], letterTexture);
 			Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
+
+			Renderer2D::submit('g', { 550.f,550.f }, advance, { 0.f,0.f,1.f,1.f });
 			Renderer2D::end();
 
 			glDisable(GL_BLEND);

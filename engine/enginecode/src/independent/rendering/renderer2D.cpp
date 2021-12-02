@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "rendering/Renderer2D.h"
+#include "systems/log.h"
+
 
 namespace Engine
 {
@@ -38,6 +40,35 @@ namespace Engine
 		IBO.reset(IndexBuffer::create(indices, 4));
 		s_data->VAO->addVertexBuffer(VBO);
 		s_data->VAO->setIndexBuffer(IBO);
+
+		//File path to a font
+		const char* filePath = "./assets/fonts/arial.ttf";
+
+		//Set the dim of the glyph buffer
+		s_data->glyphBUfferDims = { 256,256 };
+		s_data->glyphBufferSize = s_data->glyphBUfferDims.x * s_data->glyphBUfferDims.y * 4 * sizeof(unsigned char);
+		s_data->glyphBuffer.reset(static_cast<unsigned char *> (malloc(s_data->glyphBufferSize)));
+
+
+		//Initialize freetype
+		if (FT_Init_FreeType(&s_data->ft)) Log::error("Error: Freetype could not be initialised");
+
+		//Load the font 
+		if (FT_New_Face(s_data->ft, filePath, 0, &s_data->fontFace)) Log::error("Error: Freetype could not load font: {0}", filePath);
+
+		//Set the char size 
+		int32_t charSize = 86;
+		if (FT_Set_Pixel_Sizes(s_data->fontFace, 0, charSize)) Log::error("Error: freetype can't set font size: {0}", charSize);
+
+		//Init font texture
+		s_data->fontTexture.reset(Texture::create(s_data->glyphBUfferDims.x, s_data->glyphBUfferDims.y, 4, nullptr));
+
+		//Fill the glyph buffer
+		memset(s_data->glyphBuffer.get(), 60, s_data->glyphBufferSize);
+
+		// Send glyph buffer to the texture on the GPU
+		s_data->fontTexture->edit(0, 0, s_data->glyphBUfferDims.x, s_data->glyphBUfferDims.y, s_data->glyphBuffer.get());
+
 	}
 	void Renderer2D::begin(const SceneWideUniforms& swu)
 	{
@@ -113,8 +144,58 @@ namespace Engine
 		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
 
 	}
+	void Renderer2D::submit(char ch, const glm::vec2& position, float& advance, const glm::vec4 tint)
+	{
+		//Get glyph from freetype
+		if (FT_Load_Char(s_data->fontFace, ch, FT_LOAD_RENDER)) Log::error("Error: Could not load glyph for char{0}", ch);
+		else
+		{
+			//Get glyph data
+			uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
+			uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
+			glm::vec2 glyphSize(glyphWidth, glyphHeight);
+			glm::vec2 glyphBearing(s_data->fontFace->glyph->bitmap_left, -s_data->fontFace->glyph->bitmap_top);
+
+			//Calculate the advance
+			advance = static_cast<float>(s_data->fontFace->glyph->advance.x >> 6);
+
+			//Calculate the quad for the glyph
+			glm::vec2 glyphHalfExtents = glm::vec2(s_data->fontTexture->getWidthf() * 0.5f, s_data->fontTexture->getHeight() * 0.5f);
+			glm::vec2 glyphCentre = (position + glyphBearing) + glyphHalfExtents;
+
+			Quad quad = Quad::createCentreHalfExtents(glyphCentre, glyphHalfExtents);
+
+			unsigned char* glyphRGBABuffer = rtoRGBA(s_data->fontFace->glyph->bitmap.buffer, glyphWidth, glyphHeight);
+			s_data->fontTexture->edit(0, 0, glyphWidth, glyphHeight, glyphRGBABuffer);
+			free(glyphRGBABuffer);
+
+			//Submit quad
+			submit(quad, tint, s_data->fontTexture);
+		}
+
+	}
 	void Renderer2D::end()
 	{
+	}
+
+	unsigned char* Renderer2D::rtoRGBA(unsigned char* rBuffer, uint32_t width, uint32_t height)
+	{
+		uint32_t rBufferSize = width * height * 4 * sizeof(unsigned char);
+		unsigned char* result = (unsigned char*)malloc(rBufferSize);
+		memset(result, 255, rBufferSize);
+
+		unsigned char* pWalker = result;
+		for (int32_t i = 0; i < height; i++)
+		{
+			for (int32_t j = 0; j < width; j++)
+			{
+				pWalker+=3; // Go to A
+				*pWalker = *rBuffer; //Set alpha channel
+				pWalker++;
+				rBuffer++;
+			}
+		}
+		return result;
 	}
 
 	Quad Quad::createCentreHalfExtents(const glm::vec2& centre, const glm::vec2& halfExtents)

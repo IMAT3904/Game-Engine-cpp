@@ -22,10 +22,9 @@ namespace Engine
 
 	OpenGLTexture::OpenGLTexture(uint32_t width, uint32_t height, uint32_t channels, unsigned char* data)
 	{
-		if (data)
-		{
-			init(width, height, channels, data);
-		}
+
+		init(width, height, channels, data);
+		
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -38,8 +37,8 @@ namespace Engine
 		glBindTexture(GL_TEXTURE_2D, m_OpenGL_ID);
 		if (data)
 		{
-			if (m_channels == 3) glTextureSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
-			else if (m_channels == 4) glTextureSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			if (m_channels == 3) glTextureSubImage2D(m_OpenGL_ID, 0, xOffset, yOffset, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+			else if (m_channels == 4) glTextureSubImage2D(m_OpenGL_ID, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
 	}
 
