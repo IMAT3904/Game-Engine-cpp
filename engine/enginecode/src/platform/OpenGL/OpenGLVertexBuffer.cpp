@@ -6,7 +6,7 @@
 
 namespace Engine
 {
-	OpenGLVertexBuffer::OpenGLVertexBuffer(void* vertices, uint32_t size, BufferLayout layout) :m_layout(layout)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* vertices, uint32_t size, VertexBufferLayout layout) :m_layout(layout)
 	{
 		glCreateBuffers(1, &m_OpenGL_ID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_OpenGL_ID);

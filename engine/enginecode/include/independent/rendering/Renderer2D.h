@@ -77,5 +77,18 @@ namespace Engine
 		static unsigned char* rtoRGBA(unsigned char* rBuffer, uint32_t width, uint32_t height);
 	};
 
+	class Renderer2DVertex
+	{
+	public:
+		Renderer2DVertex() = default;
+		Renderer2DVertex(const glm::vec4& pos, const glm::vec2& UVs, uint32_t tu, const glm::vec4& pTint) :
+			position(pos), uvCoords(UVs), texUnit(tu), tint(pack(pTint)) {};
+		glm::vec4 position;
+		glm::vec2 uvCoords;
+		uint32_t texUnit;
+		uint32_t tint;
+		static VertexBufferLayout layout;
+
+	};
 
 }

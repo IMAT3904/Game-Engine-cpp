@@ -26,6 +26,7 @@ namespace Engine
 
 		s_data->shader.reset(Shader::create("./assets/shaders/quad1.glsl"));
 
+
 		float vertices[4 * 4] =
 		{
 			-0.5f, -0.5f, 0.f, 0.f,
@@ -39,7 +40,7 @@ namespace Engine
 		std::shared_ptr<IndexBuffer> IBO;
 
 		s_data->VAO.reset(VertexArray::create());
-		VBO.reset(VertexBuffer::create(vertices, sizeof(vertices), BufferLayout({ ShaderDataType::Float2, ShaderDataType::Float2 })));
+		VBO.reset(VertexBuffer::create(vertices, sizeof(vertices), VertexBufferLayout({ ShaderDataType::Float2, ShaderDataType::Float2 })));
 		IBO.reset(IndexBuffer::create(indices, 4));
 		s_data->VAO->addVertexBuffer(VBO);
 		s_data->VAO->setIndexBuffer(IBO);

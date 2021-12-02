@@ -27,6 +27,7 @@
 
 #include "rendering/Renderer3D.h"
 #include "rendering/Renderer2D.h"
+#include "rendering/uniformBuffer.h"
 
 namespace Engine {
 	// Set static vars
@@ -180,7 +181,7 @@ namespace Engine {
 
 		cubeVAO.reset(VertexArray::create());
 
-		BufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
+		VertexBufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
 		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), cubeBl));
 
 		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
@@ -244,6 +245,35 @@ namespace Engine {
 		);
 		glm::mat4 projection = glm::perspective(glm::radians(45.f), 1024.f / 800.f, 0.1f, 100.f);
 
+		//Camera UBO
+		uint32_t blockNumber = 0;
+		/*uint32_t cameraUBO;
+		uint32_t cameraDataSize = sizeof(glm::mat4) * 2;
+		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
+
+		glGenBuffers(1, &cameraUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, cameraUBO);
+		glBufferData(GL_UNIFORM_BUFFER, camLayout.getStride(), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferRange(GL_UNIFORM_BUFFER, blockNumber, cameraUBO, 0, camLayout.getStride());
+
+		uint32_t blockIndex = glGetUniformBlockIndex(tpShader->getID(), "b_camera");
+		glUniformBlockBinding(tpShader->getID(), blockIndex, blockNumber);
+
+		auto element = *camLayout.begin();
+
+		glBufferSubData(GL_UNIFORM_BUFFER, element.m_offset, element.m_size, glm::value_ptr(projection));
+		element = *(camLayout.begin() + 1);
+		glBufferSubData(GL_UNIFORM_BUFFER, element.m_offset, element.m_size, glm::value_ptr(view));*/
+
+		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
+		std::shared_ptr<UniformBuffer> cameraUBO;
+		cameraUBO.reset(UniformBuffer::create (camLayout));
+
+		cameraUBO->attachShaderBlock(tpShader, "b_camera");
+
+		cameraUBO->uploadData("u_projection", glm::value_ptr(projection));
+		cameraUBO->uploadData("u_view", glm::value_ptr(view));
+;
 		glm::mat4 models[3];
 		models[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-2.f, 0.f, -6.f));
 		models[1] = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -6.f));
@@ -256,8 +286,8 @@ namespace Engine {
 
 		glm::vec3 lightData[3] = { {1.f, 1.f, 1.f}, {-2.f, 4.f, 6.f}, {0.f, 0.f, 0.f} };
 
-		swu3D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view)));
-		swu3D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection)));
+
+
 		swu3D["u_lightColour"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[0])));
 		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
 		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[2])));

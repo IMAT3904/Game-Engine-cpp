@@ -8,6 +8,7 @@
 #include "rendering/texture.h"
 #include "rendering/vertexBuffer.h"
 #include "rendering/vertexArray.h"
+#include "rendering/uniformBuffer.h"
 
 #include "systems/log.h"
 
@@ -16,6 +17,7 @@
 #include "platform/OpenGL/OpenGLTexture.h"
 #include "platform/OpenGL/OpenGLVertexBuffer.h"
 #include "platform/OpenGL/OpenGLVertexArray.h"
+#include "platform/OpenGL/OpenGLUniformBuffer.h"
 
 namespace Engine 
 {
@@ -126,7 +128,7 @@ namespace Engine
         return nullptr;
     }
 
-    VertexBuffer* VertexBuffer::create(void* vertices, uint32_t size, BufferLayout layout)
+    VertexBuffer* VertexBuffer::create(void* vertices, uint32_t size, const VertexBufferLayout layout)
     {
         switch (RenderAPI::getAPI())
         {
@@ -135,6 +137,27 @@ namespace Engine
             break;
         case RenderAPI::API::OpenGL:
             return new OpenGLVertexBuffer(vertices, size, layout);
+            break;
+
+        case RenderAPI::API::Diret3D:
+            Log::error("Diret3D not currently supported");
+            break;
+        case RenderAPI::API::Vulkan:
+            Log::error("Vulkan API not currently supported");
+            break;
+        }
+        return nullptr;
+    }
+
+    UniformBuffer* UniformBuffer::create( const UniformBufferLayout layout)
+    {
+        switch (RenderAPI::getAPI())
+        {
+        case RenderAPI::API::None:
+            Log::error("Not having a rendering API currently not supported");
+            break;
+        case RenderAPI::API::OpenGL:
+            return new OpenGLUniformBuffer(layout);
             break;
 
         case RenderAPI::API::Diret3D:
