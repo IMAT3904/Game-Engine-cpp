@@ -86,6 +86,25 @@ namespace Engine {
 	}
 
 
+#pragma region TEMP_CLASS
+	class TPVertex
+	{
+	public:
+		glm::vec3 m_pos;
+		glm::vec3 m_normal;
+		glm::vec2 m_uv;
+		TPVertex() : m_pos(glm::vec3(0.f)), m_uv(glm::vec2(0.f)),m_normal(glm::vec3(0)) {};
+		TPVertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec2& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
+		static VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+
+	VertexBufferLayout TPVertex::s_layout ={ ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
+
+#pragma endregion
+
+
 	void Application::run()
 	{
 #pragma region RAW_DATA
@@ -123,29 +142,27 @@ namespace Engine {
 				 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
 		};
 
-		float pyramidVertices[8 * 16] = {
+		std::vector<TPVertex> pyramidVertices(16);
+
+		pyramidVertices.at(0) = TPVertex({ -0.5f, -0.5f, -0.5f }, { 0.f, -1.f,  0.f }, {0.f, 0.5f});//  square Magneta
+		pyramidVertices.at(1) = TPVertex({ 0.5f, -0.5f, -0.5f }, { 0.f, -1.f , 0.f }, { 0.f, 0.5f });
+		pyramidVertices.at(2) = TPVertex({ 0.5f, -0.5f,  0.5f }, { 0.f, -1.f, 0.f }, { 0.33f, 0.5f });
+		pyramidVertices.at(3) = TPVertex({ -0.5f, -0.5f,  0.5f }, { 0.f, -1.f, 0.f }, { 0.33f, 0.5f });
+		pyramidVertices.at(4) = TPVertex({ -0.5f, -0.5f, -0.5f }, { -0.8944f, 0.4472f, 0.f }, { 0.33f, 0.5f });  //triangle Green
+		pyramidVertices.at(5) = TPVertex({ -0.5f, -0.5f,  0.5f }, { -0.8944f, 0.4472f, 0.f }, { 0.66f, 0.25f });
+		pyramidVertices.at(6) = TPVertex({ 0.0f,  0.5f,  0.0f }, { -0.8944f, 0.4472f, 0.f }, { 0.33f, 0.f });
+		pyramidVertices.at(7) = TPVertex({ -0.5f, -0.5f,  0.5f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f, }); //triangle Red
+		pyramidVertices.at(8) = TPVertex({ 0.5f, -0.5f,  0.5f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f });
+		pyramidVertices.at(9) = TPVertex({ 0.0f,  0.5f,  0.0f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f });
+		pyramidVertices.at(10) = TPVertex({ 0.5f, -0.5f, 0.5f },{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f}); //  triangle Yellow
+		pyramidVertices.at(11) = TPVertex({ 0.5f, -0.5f, -0.5f},{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f});
+		pyramidVertices.at(12) = TPVertex({ 0.0f,  0.5f,  0.0f},{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f});
+		pyramidVertices.at(13) = TPVertex({ 0.5f, -0.5f, -0.5f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});//  triangle Blue
+		pyramidVertices.at(14) = TPVertex({-0.5f, -0.5f, -0.5f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});
+		pyramidVertices.at(15) = TPVertex({ 0.0f,  0.5f,  0.0f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});
 			//	 <------ Pos ------>  <--- normal --->  <--- UV ---> 
-				-0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f,  0.f,0.5f,//  square Magneta
-				 0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f,  0.f, 0.5f,
-				 0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f,  0.33f, 0.5f,
-				-0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f,  0.33f, 0.5f,
-
-				-0.5f, -0.5f, -0.5f,  -0.8944f, 0.4472f, 0.f, 0.33f, 0.5f,  //triangle Green
-				-0.5f, -0.5f,  0.5f,  -0.8944f, 0.4472f, 0.f, 0.66f, 0.25f,
-				 0.0f,  0.5f,  0.0f,  -0.8944f, 0.4472f, 0.f, 0.33f, 0.f,
-
-				-0.5f, -0.5f,  0.5f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f, //triangle Red
-				 0.5f, -0.5f,  0.5f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f,
-
-				 0.5f, -0.5f,  0.5f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f, //  triangle Yellow
-				 0.5f, -0.5f, -0.5f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f,
-
-				 0.5f, -0.5f, -0.5f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f,//  triangle Blue
-				-0.5f, -0.5f, -0.5f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f
-		};
+					
+		
 
 		uint32_t pyramidIndices[3 * 6] =
 		{
@@ -182,7 +199,7 @@ namespace Engine {
 		cubeVAO.reset(VertexArray::create());
 
 		VertexBufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), cubeBl));
+		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), TPVertex::GetLayout()));
 
 		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
@@ -194,7 +211,7 @@ namespace Engine {
 		std::shared_ptr<IndexBuffer> pyramidIBO;
 
 		pyramidVAO.reset(VertexArray::create());
-		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), cubeBl));
+		pyramidVBO.reset(VertexBuffer::create(pyramidVertices.data(), sizeof(TPVertex)*pyramidVertices.size(), cubeBl));
 		pyramidIBO.reset(IndexBuffer::create(pyramidIndices, 18));
 		pyramidVAO->addVertexBuffer(pyramidVBO);
 		pyramidVAO->setIndexBuffer(pyramidIBO);
@@ -247,23 +264,6 @@ namespace Engine {
 
 		//Camera UBO
 		uint32_t blockNumber = 0;
-		/*uint32_t cameraUBO;
-		uint32_t cameraDataSize = sizeof(glm::mat4) * 2;
-		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
-
-		glGenBuffers(1, &cameraUBO);
-		glBindBuffer(GL_UNIFORM_BUFFER, cameraUBO);
-		glBufferData(GL_UNIFORM_BUFFER, camLayout.getStride(), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferRange(GL_UNIFORM_BUFFER, blockNumber, cameraUBO, 0, camLayout.getStride());
-
-		uint32_t blockIndex = glGetUniformBlockIndex(tpShader->getID(), "b_camera");
-		glUniformBlockBinding(tpShader->getID(), blockIndex, blockNumber);
-
-		auto element = *camLayout.begin();
-
-		glBufferSubData(GL_UNIFORM_BUFFER, element.m_offset, element.m_size, glm::value_ptr(projection));
-		element = *(camLayout.begin() + 1);
-		glBufferSubData(GL_UNIFORM_BUFFER, element.m_offset, element.m_size, glm::value_ptr(view));*/
 
 		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
 		std::shared_ptr<UniformBuffer> cameraUBO;
