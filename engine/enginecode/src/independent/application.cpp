@@ -100,7 +100,7 @@ namespace Engine {
 		static VertexBufferLayout s_layout;
 	};
 
-	VertexBufferLayout TPVertex::s_layout = {  ShaderDataType::Float3, {ShaderDataType::Short3}, {ShaderDataType::Short3}};
+	VertexBufferLayout TPVertex::s_layout = { ShaderDataType::Float3, {ShaderDataType::Short3}, {ShaderDataType::Short3} };
 
 	class TPVertexNormalised
 	{
@@ -108,13 +108,28 @@ namespace Engine {
 		glm::vec3 m_pos;
 		std::array<int16_t, 3> m_normal;
 		std::array<int16_t, 2> m_uv;
-		TPVertexNormalised() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({0,0,0}) {};
-		TPVertexNormalised(const glm::vec3& pos, const std::array<int16_t,3>& norm, const std::array<int16_t, 2>& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
+		TPVertexNormalised() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({ 0,0,0 }) {};
+		TPVertexNormalised(const glm::vec3& pos, const std::array<int16_t, 3>& norm, const std::array<int16_t, 2>& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
 		static inline VertexBufferLayout GetLayout() { return s_layout; }
 	private:
 		static VertexBufferLayout s_layout;
 	};
 	VertexBufferLayout TPVertexNormalised::s_layout = { { ShaderDataType::Float3, {ShaderDataType::Short3, true}, {ShaderDataType::Short3, true}} , 24 };
+
+	class TPVertexNormalisedTint
+	{
+	public:
+		glm::vec3 m_pos;
+		std::array<int16_t, 2> m_uv;
+		uint32_t m_tint;
+		std::array<int16_t, 3> m_normal;
+		TPVertexNormalisedTint() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({ 0,0,0 }), m_tint(0) {};
+		TPVertexNormalisedTint(const glm::vec3& pos, const std::array<int16_t, 3>& norm, const std::array<int16_t, 2>& uv, uint32_t tint) :m_pos(pos), m_normal(norm), m_uv(uv), m_tint(tint) {}
+		static inline VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+	VertexBufferLayout TPVertexNormalisedTint::s_layout = { { ShaderDataType::Float3, {ShaderDataType::Short3, true}, { ShaderDataType::Byte4, true }, {ShaderDataType::Short3, true}},28 };
 
 
 
