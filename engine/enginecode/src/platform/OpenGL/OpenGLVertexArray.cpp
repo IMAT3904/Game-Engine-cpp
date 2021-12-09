@@ -13,6 +13,7 @@ namespace Engine
 		{
 			switch (type)
 			{
+			case ShaderDataType::Byte4: return GL_UNSIGNED_BYTE;
 			case ShaderDataType::Short: return GL_SHORT;
 			case ShaderDataType::Short2: return GL_SHORT;
 			case ShaderDataType::Short3: return GL_SHORT;

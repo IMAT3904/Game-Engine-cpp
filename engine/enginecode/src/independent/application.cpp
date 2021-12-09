@@ -156,6 +156,23 @@ namespace Engine {
 		return result;
 	}
 
+	uint32_t pack(const glm::vec4& colour)
+	{
+		uint32_t result = 0;
+		uint32_t r = (static_cast<uint32_t>(colour.r * 255.0f)) <<0; //000R
+		uint32_t g = (static_cast<uint32_t>(colour.g * 255.0f)) <<8; //00B0
+		uint32_t b = (static_cast<uint32_t>(colour.b * 255.0f)) <<16;//0G00
+		uint32_t a = (static_cast<uint32_t>(colour.a * 255.0f)) <<24;//A
+
+		result = (r | g | b | a);
+		return result;
+	}
+
+	uint32_t pack(const glm::vec3& colour)
+	{
+		return pack({ colour.x, colour.y, colour.z, 1.f });
+	}
+
 #pragma endregion
 
 
