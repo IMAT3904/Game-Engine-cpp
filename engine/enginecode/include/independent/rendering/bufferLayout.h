@@ -56,7 +56,7 @@ A class wich holds data about a single uniform  buffer layout
 	{
 	public:
 		BufferLayout<G>() {};
-		BufferLayout<G>(const std::initializer_list<G>& element) : m_elements(element) { callStrideAndOffset(); }
+		BufferLayout<G>(const std::initializer_list<G>& element, uint32_t stride = 0) : m_elements(element), m_stride(stride) { callStrideAndOffset(); }
 		inline uint32_t  getStride() const { return m_stride; }
 		void addElement(G element);
 		inline typename std::vector<G>::iterator begin() { return m_elements.begin(); }
@@ -85,7 +85,7 @@ A class wich holds data about a single uniform  buffer layout
 			element.m_offset = l_offset;
 			l_offset += element.m_size;
 		}
-		m_stride = l_offset;
+		if(m_stride ==0) m_stride = l_offset;
 	}
 
 	using VertexBufferLayout = BufferLayout<VertexBufferElement>;

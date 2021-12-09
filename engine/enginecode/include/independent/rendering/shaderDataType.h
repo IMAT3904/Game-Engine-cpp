@@ -15,6 +15,10 @@ namespace Engine
 		{
 			switch (type)
 			{
+			case ShaderDataType::Short: return  2;
+			case ShaderDataType::Short2: return 2 * 2;
+			case ShaderDataType::Short3: return 2 * 3;
+			case ShaderDataType::Short4: return 2 * 4;
 			case ShaderDataType::Byte4: return 4;
 			case ShaderDataType::Int: return 4;
 			case ShaderDataType::Float: return 4;
@@ -30,6 +34,10 @@ namespace Engine
 		{
 			switch (type)
 			{
+			case ShaderDataType::Short: return 1;
+			case ShaderDataType::Short2: return 2;
+			case ShaderDataType::Short3: return 3;
+			case ShaderDataType::Short4: return 4;
 			case ShaderDataType::Byte4: return 4;
 			case ShaderDataType::Int: return 1;
 			case ShaderDataType::Float: return 1;

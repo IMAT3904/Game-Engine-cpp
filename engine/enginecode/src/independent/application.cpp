@@ -93,14 +93,68 @@ namespace Engine {
 		glm::vec3 m_pos;
 		glm::vec3 m_normal;
 		glm::vec2 m_uv;
-		TPVertex() : m_pos(glm::vec3(0.f)), m_uv(glm::vec2(0.f)),m_normal(glm::vec3(0)) {};
+		TPVertex() : m_pos(glm::vec3(0.f)), m_uv(glm::vec2(0.f)), m_normal(glm::vec3(0)) {};
 		TPVertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec2& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
 		static VertexBufferLayout GetLayout() { return s_layout; }
 	private:
 		static VertexBufferLayout s_layout;
 	};
 
-	VertexBufferLayout TPVertex::s_layout ={ ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
+	VertexBufferLayout TPVertex::s_layout = {  ShaderDataType::Float3, {ShaderDataType::Short3}, {ShaderDataType::Short3}};
+
+	class TPVertexNormalised
+	{
+	public:
+		glm::vec3 m_pos;
+		std::array<int16_t, 3> m_normal;
+		std::array<int16_t, 2> m_uv;
+		TPVertexNormalised() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({0,0,0}) {};
+		TPVertexNormalised(const glm::vec3& pos, const std::array<int16_t,3>& norm, const std::array<int16_t, 2>& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
+		static inline VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+	VertexBufferLayout TPVertexNormalised::s_layout = { { ShaderDataType::Float3, {ShaderDataType::Short3, true}, {ShaderDataType::Short3, true}} , 24 };
+
+
+
+	std::array<int16_t, 3> normalise(const glm::vec3& normal)
+	{
+		std::array<int16_t, 3> result;
+
+		if (normal.x == 1.0) result.at(0) = INT16_MAX;
+		else if (normal.x == -1.0) result.at(0) = INT16_MIN;
+		else result.at(0) = static_cast<int16_t>(normal.x * static_cast<float>(INT16_MAX));
+
+
+		if (normal.y == 1.0) result.at(1) = INT16_MAX;
+		else if (normal.y == -1.0) result.at(1) = INT16_MIN;
+		else result.at(1) = static_cast<int16_t>(normal.y * static_cast<float>(INT16_MAX));
+
+
+		if (normal.z == 1.0) result.at(2) = INT16_MAX;
+		else if (normal.z == -1.0) result.at(2) = INT16_MIN;
+		else result.at(2) = static_cast<int16_t>(normal.z * static_cast<float>(INT16_MAX));
+
+		return result;
+		
+	}
+
+	std::array<int16_t, 2> normalise(const glm::vec2& uv)
+	{
+		std::array<int16_t, 2> result;
+
+		if (uv.x == 1.0) result.at(0) = INT16_MAX;
+		else if (uv.x == -1.0) result.at(0) = INT16_MIN;
+		else result.at(0) = static_cast<int16_t>(uv.x * static_cast<float>(INT16_MAX));
+
+
+		if (uv.y == 1.0) result.at(1) = INT16_MAX;
+		else if (uv.y == -1.0) result.at(1) = INT16_MIN;
+		else result.at(1) = static_cast<int16_t>(uv.y * static_cast<float>(INT16_MAX));
+
+		return result;
+	}
 
 #pragma endregion
 
@@ -109,38 +163,61 @@ namespace Engine {
 	{
 #pragma region RAW_DATA
 
-		float cubeVertices[8 * 24] = {
-			//	 <------ Pos ------>  <--- normal --->  <-- UV -->
-				 0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.f,
-				 0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.5f,
-				-0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.5f,
-				-0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.f,
+		std::vector<TPVertexNormalised> cubeVertices(24);
 
-				-0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33f, 0.5f,
-				 0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.5f,
-				 0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.f,
-				-0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33,  0.f,
+		cubeVertices.at(0) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.f,   0.f }));
+		cubeVertices.at(1) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.f,   0.5f}));
+		cubeVertices.at(2) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(3) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.33f, 0.f }));
+		cubeVertices.at(4) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(5) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(6) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.66f, 0.f }));
+		cubeVertices.at(7) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.33,  0.f }));
+		cubeVertices.at(8) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({0.f, -1.f,  0.f}),normalise({1.f,   0.f }));
+		cubeVertices.at(9) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({0.f, -1.f,  0.f}),normalise({0.66f, 0.f }));
+		cubeVertices.at(10) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({0.f, -1.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(11) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({0.f, -1.f,  0.f}),normalise({1.0f,  0.5f}));
+		cubeVertices.at(12) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({0.f,  1.f,  0.f}),normalise({0.f,   0.5f}));
+		cubeVertices.at(13) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({0.f,  1.f,  0.f}),normalise({0.f,   1.0f}));
+		cubeVertices.at(14) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({0.f,  1.f,  0.f}),normalise({0.33f, 1.0f}));
+		cubeVertices.at(15) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({0.f,  1.f,  0.f}),normalise({0.3f,  0.5f}));
+		cubeVertices.at(16) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({-1.f,  0.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(17) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({-1.f,  0.f,  0.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(18) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({-1.f,  0.f,  0.f}),normalise({0.33f, 1.0f}));
+		cubeVertices.at(19) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({-1.f,  0.f,  0.f}),normalise({0.66f, 1.0f}));
+		cubeVertices.at(20) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({1.f,  0.f,  0.f}),normalise({1.0f,  1.0f}));
+		cubeVertices.at(21) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({1.f,  0.f,  0.f}),normalise({1.0f,  0.5f}));
+		cubeVertices.at(22) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(23) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 1.0f}));
 
-				-0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  1.f,   0.f,
-				 0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  0.66f, 0.f,
-				 0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  0.66f, 0.5f,
-				-0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  1.0f,  0.5f,
 
-				 0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.f,   0.5f,
-				 0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.f,   1.0f,
-				-0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.33f, 1.0f,
-				-0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.3f,  0.5f,
-
-				-0.5f,  0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 0.5f,
-				-0.5f,  0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 0.5f,
-				-0.5f, -0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 1.0f,
-				-0.5f, -0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 1.0f,
-
-				 0.5f, -0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  1.0f,
-				 0.5f,  0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  0.5f,
-				 0.5f,  0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 0.5f,
-				 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
-		};
+		//float cubeVertices[8 * 24] = {
+		//	//	 <------ Pos ------>  <--- normal --->  <-- UV -->
+		//		 0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.f ,
+		//		 0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.5f,
+		//		-0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.5f,
+		//		-0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.f ,
+		//		-0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33f, 0.5f,
+		//		 0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.5f,
+		//		 0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.f ,
+		//		-0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33,  0.f ,
+		//		-0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  1.f,   0.f ,
+		//		 0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  0.66f, 0.f ,
+		//		 0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  0.66f, 0.5f,
+		//		-0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  1.0f,  0.5f,
+		//		 0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.f,   0.5f,
+		//		 0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.f,   1.0f,
+		//		-0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.33f, 1.0f,
+		//		-0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.3f,  0.5f,
+		//		-0.5f,  0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 0.5f,
+		//		-0.5f,  0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 0.5f,
+		//		-0.5f, -0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 1.0f,
+		//		-0.5f, -0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 1.0f,
+		//		 0.5f, -0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  1.0f,
+		//		 0.5f,  0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  0.5f,
+		//		 0.5f,  0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 0.5f,
+		//		 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
+		//};
 
 		std::vector<TPVertex> pyramidVertices(16);
 
@@ -199,7 +276,7 @@ namespace Engine {
 		cubeVAO.reset(VertexArray::create());
 
 		VertexBufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), TPVertex::GetLayout()));
+		cubeVBO.reset(VertexBuffer::create(cubeVertices.data(), sizeof(TPVertexNormalised) * cubeVertices.size(), TPVertexNormalised::GetLayout()));
 
 		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
