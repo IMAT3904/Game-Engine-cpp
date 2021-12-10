@@ -9,41 +9,58 @@
 
 namespace Engine
 {
+
+	VertexBufferLayout Renderer2DVertex::layout = VertexBufferLayout({ ShaderDataType::Float4, ShaderDataType::Float2,ShaderDataType::FlatInt, {ShaderDataType::Byte4,true} });
 	std::shared_ptr<Renderer2D::InternalData> Renderer2D::s_data = nullptr;
 
 	void Renderer2D::init()
 	{
 		s_data.reset(new InternalData);
 
-
+		s_data->textureUnits = { 0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
 
 
 		unsigned char whitePX[4] = { 255,255,255,255 };
 		s_data->defaultTexture.reset(Texture::create(1, 1, 4, whitePX));
+		s_data->defaultSubTexture = SubTexture(s_data->defaultTexture, { 0,0 }, {1, 1});
 
 		s_data->defaultTint = { 1.f,1.f,1.f,1.f };
 		s_data->model = glm::mat4(1.0f);
 
-		s_data->shader.reset(Shader::create("./assets/shaders/quad1.glsl"));
+		s_data->shader.reset(Shader::create("./assets/shaders/quad2.glsl"));
+
+		s_data->UBO.reset(UniformBuffer::create(UniformBufferLayout({
+			{ "u_projection",ShaderDataType::Mat4 },
+			{ "u_view",ShaderDataType::Mat4 }
+	})));
 
 
-		float vertices[4 * 4] =
-		{
-			-0.5f, -0.5f, 0.f, 0.f,
-			-0.5f,  0.5f, 0.f, 1.f,
-			 0.5f,  0.5f, 1.f, 1.f,
-			 0.5f,  -0.5f, 1.f, 0.f
-		};
+		s_data->shader->uploadIntArray("u_texData", s_data->textureUnits.data(), 32);
+
+		s_data->quads[0] = { -0.5f, -0.5f,1,1 };
+		s_data->quads[1] = { -0.5f,  0.5f,1,1 };
+		s_data->quads[2] = { 0.5f,  0.5f,1,1 };
+		s_data->quads[3] = { 0.5f, -0.5f,1,1 };
+
+		
+		s_data->vertices[0] = Renderer2DVertex(s_data->quads[0],{ 0.f, 0.f  },0, glm::vec4(1.f));
+		s_data->vertices[1] = Renderer2DVertex(s_data->quads[1], { 0.f, 1.f },0, glm::vec4(1.f));
+		s_data->vertices[2] = Renderer2DVertex(s_data->quads[2], { 1.f, 1.f },0, glm::vec4(1.f));
+		s_data->vertices[3] = Renderer2DVertex(s_data->quads[3], { 1.f, 0.f },0, glm::vec4(1.f));
+
+
 		uint32_t indices[4] = { 0,1,2,3 };
 
 		std::shared_ptr<VertexBuffer> VBO;
 		std::shared_ptr<IndexBuffer> IBO;
 
 		s_data->VAO.reset(VertexArray::create());
-		VBO.reset(VertexBuffer::create(vertices, sizeof(vertices), VertexBufferLayout({ ShaderDataType::Float2, ShaderDataType::Float2 })));
+		VBO.reset(VertexBuffer::create(s_data->vertices.data(), sizeof(Renderer2DVertex) * s_data->vertices.size(), Renderer2DVertex::layout));
 		IBO.reset(IndexBuffer::create(indices, 4));
 		s_data->VAO->addVertexBuffer(VBO);
 		s_data->VAO->setIndexBuffer(IBO);
+
+		s_data->UBO->attachShaderBlock(s_data->shader, "b_camera");
 
 		//File path to a font
 		const char* filePath = "./assets/fonts/arial.ttf";
@@ -158,29 +175,10 @@ namespace Engine
 		//Bind the shader
 		glUseProgram(s_data->shader->getID());
 
-		//Apply sceneWideUniforms
-		for (auto& dataPair : swu)
-		{
-			const char* nameOfUniform = dataPair.first;
-			ShaderDataType sdt = dataPair.second.first;
-			void* addressOfValue = dataPair.second.second;
+		glBindBuffer(GL_UNIFORM_BUFFER, s_data->UBO->GetRenderID());
+		s_data->UBO->uploadData("u_projection", swu.at("u_projection").second);
+		s_data->UBO->uploadData("u_view", swu.at("u_view").second);
 
-			switch (sdt)
-			{
-			case ShaderDataType::Int:
-				s_data->shader->uploadInt(nameOfUniform, *(int*)addressOfValue);
-				break;
-			case ShaderDataType::Float3:
-				s_data->shader->uploadFloat3(nameOfUniform, *(glm::vec3*)addressOfValue);
-				break;
-			case ShaderDataType::Float4:
-				s_data->shader->uploadFloat4(nameOfUniform, *(glm::vec4*)addressOfValue);
-				break;
-			case ShaderDataType::Mat4:
-				s_data->shader->uploadMat4(nameOfUniform, *(glm::mat4*)addressOfValue);
-				break;
-			}
-		}
 
 		//Bind the geometry
 		glBindVertexArray(s_data->VAO->getID());
@@ -188,56 +186,64 @@ namespace Engine
 	}
 	void Renderer2D::submit(const Quad& quad, const glm::vec4 & tint)
 	{
-		Renderer2D::submit(quad, tint, s_data->defaultTexture);
+		Renderer2D::submit(quad, tint,s_data->defaultSubTexture);
 	}
-	void Renderer2D::submit(const Quad& quad, const std::shared_ptr<Texture>& texture)
+	void Renderer2D::submit(const Quad& quad, const SubTexture& texture)
 	{
 		Renderer2D::submit(quad, s_data->defaultTint, texture);
 	}
-	void Renderer2D::submit(const Quad& quad, const SubTexture& subtexture)
-	{
-		Renderer2D::submit(quad, s_data->defaultTint, subtexture);
-	}
-	void Renderer2D::submit(const Quad& quad, const std::shared_ptr<Texture>& texture, float angle, bool degrees)
+	void Renderer2D::submit(const Quad& quad, const SubTexture& texture, float angle, bool degrees)
 	{
 		Renderer2D::submit(quad, s_data->defaultTint, texture,angle,degrees);
 	}
-	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const std::shared_ptr<Texture>& texture)
+	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const SubTexture& texture)
 	{
-		glBindTexture(GL_TEXTURE_2D, texture->getID());
+		glBindTexture(GL_TEXTURE_2D, texture.getBaseTexture()->getID());
 		s_data->model = glm::scale(glm::translate(glm::mat4(1.f), quad.m_translate), quad.m_scale);
 
 		s_data->shader->uploadInt("u_texData", 0);
 		s_data->shader->uploadFloat4("u_tint", tint);
-		s_data->shader->uploadMat4("u_model", s_data->model);
+		uint32_t packedTint = Renderer2DVertex::pack(tint);
+		for (int i = 0; i < 4; i++)
+		{
+			s_data->vertices[i].position = s_data->model * s_data->quads[i];
+			s_data->vertices[i].tint = packedTint;
+		}
+		s_data->VAO->GetVertexBuffers().at(0)->edit(s_data->vertices.data(), sizeof(Renderer2DVertex) * s_data->vertices.size(), 0);
 
 		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
 	}
-	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const SubTexture& subtexture)
-	{
-		glBindTexture(GL_TEXTURE_2D, subtexture.getBaseTexture()->getID());
-		s_data->model = glm::scale(glm::translate(glm::mat4(1.f), quad.m_translate), quad.m_scale);
+	//void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const SubTexture& subtexture)
+	//{
+	//	glBindTexture(GL_TEXTURE_2D, subtexture.getBaseTexture()->getID());
+	//	s_data->model = glm::scale(glm::translate(glm::mat4(1.f), quad.m_translate), quad.m_scale);
 
-		s_data->shader->uploadInt("u_texData", 0);
-		s_data->shader->uploadFloat4("u_tint", tint);
-		s_data->shader->uploadMat4("u_model", s_data->model);
+	//	s_data->shader->uploadInt("u_texData", 0);
+	//	s_data->shader->uploadFloat4("u_tint", tint);
 
-		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
-	}
+	//	glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
+	//}
 	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, float angle, bool degrees)
 	{
-		Renderer2D::submit(quad, tint, s_data->defaultTexture,angle,degrees);
+		Renderer2D::submit(quad, tint, s_data->defaultSubTexture,angle,degrees);
 	}
-	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const std::shared_ptr<Texture>& texture, float angle, bool degrees)
+	void Renderer2D::submit(const Quad& quad, const glm::vec4& tint, const SubTexture& texture, float angle, bool degrees)
 	{
 		if (degrees) angle = glm::radians(angle);
 
-		glBindTexture(GL_TEXTURE_2D, texture->getID());
+		glBindTexture(GL_TEXTURE_2D, texture.getBaseTexture()->getID());
 		s_data->model = glm::scale(glm::rotate(glm::translate(glm::mat4(1.f), quad.m_translate), angle, {0.f,0.f,1.f}), quad.m_scale);
 
 		s_data->shader->uploadInt("u_texData", 0);
 		s_data->shader->uploadFloat4("u_tint", tint);
-		s_data->shader->uploadMat4("u_model", s_data->model);
+		uint32_t packedTint = Renderer2DVertex::pack(tint);
+
+		for (int i = 0; i < 4; i++)
+		{
+			s_data->vertices[i].position = s_data->model * s_data->quads[i];
+			s_data->vertices[i].tint = packedTint;
+		}
+		s_data->VAO->GetVertexBuffers().at(0)->edit(s_data->vertices.data(), sizeof(Renderer2DVertex) * s_data->vertices.size(), 0);
 
 		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);
 
@@ -313,6 +319,17 @@ namespace Engine
 		result.m_translate = glm::vec3(centre, 0.f);
 		result.m_scale = glm::vec3(halfExtents * 2.f, 1.f);
 		
+		return result;
+	}
+	uint32_t Renderer2DVertex::pack(const glm::vec4& tint)
+	{
+		uint32_t result = 0;
+		uint32_t r = (static_cast<uint32_t>(tint.r * 255.0f)) << 0; //000R
+		uint32_t g = (static_cast<uint32_t>(tint.g * 255.0f)) << 8; //00B0
+		uint32_t b = (static_cast<uint32_t>(tint.b * 255.0f)) << 16;//0G00
+		uint32_t a = (static_cast<uint32_t>(tint.a * 255.0f)) << 24;//A
+
+		result = (r | g | b | a);
 		return result;
 	}
 }

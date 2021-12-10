@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "rendering/shaderDataType.h"
 #include "rendering/texture.h"
+#include "rendering/RendererCommon.h"
 #include "rendering/shader.h"
 #include "rendering/vertexArray.h"
 

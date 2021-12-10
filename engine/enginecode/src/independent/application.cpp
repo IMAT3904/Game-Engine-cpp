@@ -457,8 +457,8 @@ namespace Engine {
 
 			Renderer2D::begin(swu2D);
 			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
-			Renderer2D::submit(quads[1], letterTexture);
-			Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
+			//Renderer2D::submit(quads[1], letterTexture);
+			//Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
 
 			uint32_t x = 550.f;
 			Renderer2D::submit('g', { x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;

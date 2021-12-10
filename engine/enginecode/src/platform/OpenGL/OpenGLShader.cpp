@@ -87,7 +87,12 @@ namespace Engine {
 	{
 		glDeleteProgram(m_OpenGL_ID);
 	}
-	void  OpenGLShader::uploadInt(const char* name, int value) const 
+	void OpenGLShader::uploadIntArray(const char* name, int32_t* values, uint32_t count) const
+	{
+		uint32_t uniformLocation = glGetUniformLocation(m_OpenGL_ID, name);
+		glUniform1iv(uniformLocation, count, values);
+	}
+	void  OpenGLShader::uploadInt(const char* name, int value) const
 	{
 		uint32_t unifromLocation = glGetUniformLocation(m_OpenGL_ID, name);
 		glUniform1i(unifromLocation, value);

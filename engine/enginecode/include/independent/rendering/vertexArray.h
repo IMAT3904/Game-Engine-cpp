@@ -17,6 +17,7 @@ namespace Engine
 		virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) = 0;
 		virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)  =0;
 		virtual inline uint32_t getDrawCount() const = 0;
+		virtual inline std::vector<std::shared_ptr<VertexBuffer>> GetVertexBuffers() const = 0;
 
 		static VertexArray* create();
 	};

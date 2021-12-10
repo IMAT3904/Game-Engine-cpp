@@ -15,6 +15,7 @@ namespace Engine
 		static Shader* create(const char* filepath);
 
 		virtual void uploadInt(const char* name, int value) const =0;
+		virtual void uploadIntArray(const char* name, int32_t* values, uint32_t count) const = 0;
 		virtual void uploadFloat(const char* name, float value)const = 0;
 		virtual void uploadFloat2(const char* name, const glm::vec2& value)const = 0;
 		virtual void uploadFloat3(const char* name, const glm::vec3& value)const = 0;
