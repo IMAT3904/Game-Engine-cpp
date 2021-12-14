@@ -28,7 +28,7 @@ namespace Engine
 		s_data->model = glm::mat4(1.0f);
 
 		s_data->shader.reset(Shader::create("./assets/shaders/quad2.glsl"));
-
+		glUseProgram( s_data->shader->getID());
 		s_data->UBO.reset(UniformBuffer::create(UniformBufferLayout({
 			{ "u_projection",ShaderDataType::Mat4 },
 			{ "u_view",ShaderDataType::Mat4 }
@@ -209,6 +209,12 @@ namespace Engine
 			s_data->vertices[i].position = s_data->model * s_data->quads[i];
 			s_data->vertices[i].tint = packedTint;
 		}
+
+		/*s_data->vertices[0].uvCoords = texture.getUVStart();
+		s_data->vertices[1].uvCoords = { texture.getUVStart().x,texture.getUVEnd().y };
+		s_data->vertices[2].uvCoords = texture.getUVEnd();
+		s_data->vertices[3].uvCoords = { texture.getUVEnd().x,texture.getUVStart().y };*/
+
 		s_data->VAO->GetVertexBuffers().at(0)->edit(s_data->vertices.data(), sizeof(Renderer2DVertex) * s_data->vertices.size(), 0);
 
 		glDrawElements(GL_QUADS, s_data->VAO->getDrawCount(), GL_UNSIGNED_INT, nullptr);

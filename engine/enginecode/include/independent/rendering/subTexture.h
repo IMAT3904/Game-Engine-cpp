@@ -12,8 +12,8 @@ namespace Engine
 	public:
 		SubTexture();
 		SubTexture(const std::shared_ptr<Texture>& texture, const glm::vec2& UVStart, glm::vec2 UVEND);
-		inline glm::vec2 getUVStart() { return m_UVStart; };
-		inline glm::vec2 getUVEnd() { return m_UVEnd; };
+		inline glm::vec2 getUVStart() const { return m_UVStart; };
+		inline glm::vec2 getUVEnd()const { return m_UVEnd; };
 		glm::ivec2 getSize() { return m_size; };
 		glm::vec2 getSizef() { return { static_cast<float>(m_size.x), static_cast<float>(m_size.y) }; };
 		inline uint32_t getWidth() { return m_size.x; }
