@@ -8,9 +8,14 @@ layout(location = 2) in vec2 a_texCoord;
 out vec3 fragmentPos;
 out vec3 normal;
 out vec2 texCoord;
+
 uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
+
+layout (std140) uniform b_camera
+{
+	mat4 u_view;
+	mat4 u_projection;
+};
 void main()
 {
 	fragmentPos = vec3(u_model * vec4(a_vertexPosition, 1.0));

@@ -14,8 +14,8 @@ namespace Engine
 
 	
 		virtual void edit(void* vertices, uint32_t size, uint32_t offset)const = 0;
-		virtual inline const BufferLayout& getLayout()const = 0;
+		virtual inline const VertexBufferLayout& getLayout()const = 0;
 
-		static VertexBuffer* create(void* vertices, uint32_t size, BufferLayout layout);
+		static VertexBuffer* create(void* vertices, uint32_t size, const VertexBufferLayout layout);
 	};
 }

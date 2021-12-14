@@ -15,7 +15,7 @@ namespace Engine
 		OpenGLShader(const char* filepath);
 		~OpenGLShader();
 		virtual inline uint32_t getID() const override { return m_OpenGL_ID; }
-
+		virtual void uploadIntArray(const char* name, int32_t* values, uint32_t count) const override;
 		virtual void uploadInt(const char* name, int value) const override;
 		virtual void uploadFloat(const char* name, float value) const override;
 		virtual void uploadFloat2(const char* name, const glm::vec2& value) const override;

@@ -23,6 +23,7 @@ namespace Engine
 			if (m_indexBuffer) { m_indexBuffer->getCount(); }
 			else { return 0; }
 		}
+		inline std::vector<std::shared_ptr<VertexBuffer>> GetVertexBuffers() const override { return m_vertexBuffers; }
 	private:
 		uint32_t m_OpenGL_ID; //!< Render ID
 		uint32_t m_attributeIndex = 0; //!< Atribute Index

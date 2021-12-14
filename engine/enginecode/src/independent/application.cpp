@@ -27,6 +27,7 @@
 
 #include "rendering/Renderer3D.h"
 #include "rendering/Renderer2D.h"
+#include "rendering/uniformBuffer.h"
 
 namespace Engine {
 	// Set static vars
@@ -85,66 +86,192 @@ namespace Engine {
 	}
 
 
+#pragma region TEMP_CLASS
+	class TPVertex
+	{
+	public:
+		glm::vec3 m_pos;
+		glm::vec3 m_normal;
+		glm::vec2 m_uv;
+		TPVertex() : m_pos(glm::vec3(0.f)), m_uv(glm::vec2(0.f)), m_normal(glm::vec3(0)) {};
+		TPVertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec2& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
+		static VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+
+	VertexBufferLayout TPVertex::s_layout = { ShaderDataType::Float3, {ShaderDataType::Short3}, {ShaderDataType::Short3} };
+
+	class TPVertexNormalised
+	{
+	public:
+		glm::vec3 m_pos;
+		std::array<int16_t, 3> m_normal;
+		std::array<int16_t, 2> m_uv;
+		TPVertexNormalised() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({ 0,0,0 }) {};
+		TPVertexNormalised(const glm::vec3& pos, const std::array<int16_t, 3>& norm, const std::array<int16_t, 2>& uv) :m_pos(pos), m_normal(norm), m_uv(uv) {}
+		static inline VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+	VertexBufferLayout TPVertexNormalised::s_layout = { { ShaderDataType::Float3, {ShaderDataType::Short3, true}, {ShaderDataType::Short3, true}} , 24 };
+
+	class TPVertexNormalisedTint
+	{
+	public:
+		glm::vec3 m_pos;
+		std::array<int16_t, 2> m_uv;
+		uint32_t m_tint;
+		std::array<int16_t, 3> m_normal;
+		TPVertexNormalisedTint() : m_pos(glm::vec3(0.f)), m_uv({ 0,0 }), m_normal({ 0,0,0 }), m_tint(0) {};
+		TPVertexNormalisedTint(const glm::vec3& pos, const std::array<int16_t, 3>& norm, const std::array<int16_t, 2>& uv, uint32_t tint) :m_pos(pos), m_normal(norm), m_uv(uv), m_tint(tint) {}
+		static inline VertexBufferLayout GetLayout() { return s_layout; }
+	private:
+		static VertexBufferLayout s_layout;
+	};
+	VertexBufferLayout TPVertexNormalisedTint::s_layout = { { ShaderDataType::Float3, {ShaderDataType::Short3, true}, { ShaderDataType::Byte4, true }, {ShaderDataType::Short3, true}},28 };
+
+
+
+	std::array<int16_t, 3> normalise(const glm::vec3& normal)
+	{
+		std::array<int16_t, 3> result;
+
+		if (normal.x == 1.0) result.at(0) = INT16_MAX;
+		else if (normal.x == -1.0) result.at(0) = INT16_MIN;
+		else result.at(0) = static_cast<int16_t>(normal.x * static_cast<float>(INT16_MAX));
+
+
+		if (normal.y == 1.0) result.at(1) = INT16_MAX;
+		else if (normal.y == -1.0) result.at(1) = INT16_MIN;
+		else result.at(1) = static_cast<int16_t>(normal.y * static_cast<float>(INT16_MAX));
+
+
+		if (normal.z == 1.0) result.at(2) = INT16_MAX;
+		else if (normal.z == -1.0) result.at(2) = INT16_MIN;
+		else result.at(2) = static_cast<int16_t>(normal.z * static_cast<float>(INT16_MAX));
+
+		return result;
+		
+	}
+
+	std::array<int16_t, 2> normalise(const glm::vec2& uv)
+	{
+		std::array<int16_t, 2> result;
+
+		if (uv.x == 1.0) result.at(0) = INT16_MAX;
+		else if (uv.x == -1.0) result.at(0) = INT16_MIN;
+		else result.at(0) = static_cast<int16_t>(uv.x * static_cast<float>(INT16_MAX));
+
+
+		if (uv.y == 1.0) result.at(1) = INT16_MAX;
+		else if (uv.y == -1.0) result.at(1) = INT16_MIN;
+		else result.at(1) = static_cast<int16_t>(uv.y * static_cast<float>(INT16_MAX));
+
+		return result;
+	}
+
+	uint32_t pack(const glm::vec4& colour)
+	{
+		uint32_t result = 0;
+		uint32_t r = (static_cast<uint32_t>(colour.r * 255.0f)) <<0; //000R
+		uint32_t g = (static_cast<uint32_t>(colour.g * 255.0f)) <<8; //00B0
+		uint32_t b = (static_cast<uint32_t>(colour.b * 255.0f)) <<16;//0G00
+		uint32_t a = (static_cast<uint32_t>(colour.a * 255.0f)) <<24;//A
+
+		result = (r | g | b | a);
+		return result;
+	}
+
+	uint32_t pack(const glm::vec3& colour)
+	{
+		return pack({ colour.x, colour.y, colour.z, 1.f });
+	}
+
+#pragma endregion
+
+
 	void Application::run()
 	{
 #pragma region RAW_DATA
 
-		float cubeVertices[8 * 24] = {
-			//	 <------ Pos ------>  <--- normal --->  <-- UV -->
-				 0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.f,
-				 0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.5f,
-				-0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.5f,
-				-0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.f,
+		std::vector<TPVertexNormalised> cubeVertices(24);
 
-				-0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33f, 0.5f,
-				 0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.5f,
-				 0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.f,
-				-0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33,  0.f,
+		cubeVertices.at(0) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.f,   0.f }));
+		cubeVertices.at(1) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.f,   0.5f}));
+		cubeVertices.at(2) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(3) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({0.f,  0.f, -1.f}),normalise({0.33f, 0.f }));
+		cubeVertices.at(4) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(5) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(6) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.66f, 0.f }));
+		cubeVertices.at(7) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({0.f,  0.f,  1.f}),normalise({0.33,  0.f }));
+		cubeVertices.at(8) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({0.f, -1.f,  0.f}),normalise({1.f,   0.f }));
+		cubeVertices.at(9) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({0.f, -1.f,  0.f}),normalise({0.66f, 0.f }));
+		cubeVertices.at(10) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({0.f, -1.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(11) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({0.f, -1.f,  0.f}),normalise({1.0f,  0.5f}));
+		cubeVertices.at(12) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({0.f,  1.f,  0.f}),normalise({0.f,   0.5f}));
+		cubeVertices.at(13) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({0.f,  1.f,  0.f}),normalise({0.f,   1.0f}));
+		cubeVertices.at(14) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({0.f,  1.f,  0.f}),normalise({0.33f, 1.0f}));
+		cubeVertices.at(15) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({0.f,  1.f,  0.f}),normalise({0.3f,  0.5f}));
+		cubeVertices.at(16) = TPVertexNormalised({-0.5f,  0.5f, 0.5f },normalise({-1.f,  0.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(17) = TPVertexNormalised({-0.5f,  0.5f, -0.5f},normalise({-1.f,  0.f,  0.f}),normalise({0.33f, 0.5f}));
+		cubeVertices.at(18) = TPVertexNormalised({-0.5f, -0.5f, -0.5f},normalise({-1.f,  0.f,  0.f}),normalise({0.33f, 1.0f}));
+		cubeVertices.at(19) = TPVertexNormalised({-0.5f, -0.5f, 0.5f },normalise({-1.f,  0.f,  0.f}),normalise({0.66f, 1.0f}));
+		cubeVertices.at(20) = TPVertexNormalised({ 0.5f, -0.5f, -0.5f},normalise({1.f,  0.f,  0.f}),normalise({1.0f,  1.0f}));
+		cubeVertices.at(21) = TPVertexNormalised({ 0.5f,  0.5f, -0.5f},normalise({1.f,  0.f,  0.f}),normalise({1.0f,  0.5f}));
+		cubeVertices.at(22) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 0.5f}));
+		cubeVertices.at(23) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 1.0f}));
 
-				-0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  1.f,   0.f,
-				 0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  0.66f, 0.f,
-				 0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  0.66f, 0.5f,
-				-0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  1.0f,  0.5f,
 
-				 0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.f,   0.5f,
-				 0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.f,   1.0f,
-				-0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.33f, 1.0f,
-				-0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.3f,  0.5f,
+		//float cubeVertices[8 * 24] = {
+		//	//	 <------ Pos ------>  <--- normal --->  <-- UV -->
+		//		 0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.f ,
+		//		 0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.5f,
+		//		-0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.5f,
+		//		-0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.f ,
+		//		-0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33f, 0.5f,
+		//		 0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.5f,
+		//		 0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.f ,
+		//		-0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33,  0.f ,
+		//		-0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  1.f,   0.f ,
+		//		 0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  0.66f, 0.f ,
+		//		 0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  0.66f, 0.5f,
+		//		-0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  1.0f,  0.5f,
+		//		 0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.f,   0.5f,
+		//		 0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.f,   1.0f,
+		//		-0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.33f, 1.0f,
+		//		-0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.3f,  0.5f,
+		//		-0.5f,  0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 0.5f,
+		//		-0.5f,  0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 0.5f,
+		//		-0.5f, -0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 1.0f,
+		//		-0.5f, -0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 1.0f,
+		//		 0.5f, -0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  1.0f,
+		//		 0.5f,  0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  0.5f,
+		//		 0.5f,  0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 0.5f,
+		//		 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
+		//};
 
-				-0.5f,  0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 0.5f,
-				-0.5f,  0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 0.5f,
-				-0.5f, -0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 1.0f,
-				-0.5f, -0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 1.0f,
+		std::vector<TPVertex> pyramidVertices(16);
 
-				 0.5f, -0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  1.0f,
-				 0.5f,  0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  0.5f,
-				 0.5f,  0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 0.5f,
-				 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
-		};
-
-		float pyramidVertices[8 * 16] = {
+		pyramidVertices.at(0) = TPVertex({ -0.5f, -0.5f, -0.5f }, { 0.f, -1.f,  0.f }, {0.f, 0.5f});//  square Magneta
+		pyramidVertices.at(1) = TPVertex({ 0.5f, -0.5f, -0.5f }, { 0.f, -1.f , 0.f }, { 0.f, 0.5f });
+		pyramidVertices.at(2) = TPVertex({ 0.5f, -0.5f,  0.5f }, { 0.f, -1.f, 0.f }, { 0.33f, 0.5f });
+		pyramidVertices.at(3) = TPVertex({ -0.5f, -0.5f,  0.5f }, { 0.f, -1.f, 0.f }, { 0.33f, 0.5f });
+		pyramidVertices.at(4) = TPVertex({ -0.5f, -0.5f, -0.5f }, { -0.8944f, 0.4472f, 0.f }, { 0.33f, 0.5f });  //triangle Green
+		pyramidVertices.at(5) = TPVertex({ -0.5f, -0.5f,  0.5f }, { -0.8944f, 0.4472f, 0.f }, { 0.66f, 0.25f });
+		pyramidVertices.at(6) = TPVertex({ 0.0f,  0.5f,  0.0f }, { -0.8944f, 0.4472f, 0.f }, { 0.33f, 0.f });
+		pyramidVertices.at(7) = TPVertex({ -0.5f, -0.5f,  0.5f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f, }); //triangle Red
+		pyramidVertices.at(8) = TPVertex({ 0.5f, -0.5f,  0.5f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f });
+		pyramidVertices.at(9) = TPVertex({ 0.0f,  0.5f,  0.0f }, { 0.f, 0.4472f, 0.8944f }, { 0.f, 0.f });
+		pyramidVertices.at(10) = TPVertex({ 0.5f, -0.5f, 0.5f },{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f}); //  triangle Yellow
+		pyramidVertices.at(11) = TPVertex({ 0.5f, -0.5f, -0.5f},{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f});
+		pyramidVertices.at(12) = TPVertex({ 0.0f,  0.5f,  0.0f},{  0.8944f, 0.4472f, 0.f}, {0.f, 0.f});
+		pyramidVertices.at(13) = TPVertex({ 0.5f, -0.5f, -0.5f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});//  triangle Blue
+		pyramidVertices.at(14) = TPVertex({-0.5f, -0.5f, -0.5f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});
+		pyramidVertices.at(15) = TPVertex({ 0.0f,  0.5f,  0.0f},{  0.f, 0.4472f, -0.8944f},{ 0.f, 0.f});
 			//	 <------ Pos ------>  <--- normal --->  <--- UV ---> 
-				-0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f,  0.f,0.5f,//  square Magneta
-				 0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f,  0.f, 0.5f,
-				 0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f,  0.33f, 0.5f,
-				-0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f,  0.33f, 0.5f,
-
-				-0.5f, -0.5f, -0.5f,  -0.8944f, 0.4472f, 0.f, 0.33f, 0.5f,  //triangle Green
-				-0.5f, -0.5f,  0.5f,  -0.8944f, 0.4472f, 0.f, 0.66f, 0.25f,
-				 0.0f,  0.5f,  0.0f,  -0.8944f, 0.4472f, 0.f, 0.33f, 0.f,
-
-				-0.5f, -0.5f,  0.5f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f, //triangle Red
-				 0.5f, -0.5f,  0.5f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.f, 0.4472f, 0.8944f, 0.f, 0.f,
-
-				 0.5f, -0.5f,  0.5f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f, //  triangle Yellow
-				 0.5f, -0.5f, -0.5f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.8944f, 0.4472f, 0.f, 0.f, 0.f,
-
-				 0.5f, -0.5f, -0.5f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f,//  triangle Blue
-				-0.5f, -0.5f, -0.5f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f,
-				 0.0f,  0.5f,  0.0f,  0.f, 0.4472f, -0.8944f, 0.f, 0.f
-		};
+					
+		
 
 		uint32_t pyramidIndices[3 * 6] =
 		{
@@ -180,8 +307,8 @@ namespace Engine {
 
 		cubeVAO.reset(VertexArray::create());
 
-		BufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
-		cubeVBO.reset(VertexBuffer::create(cubeVertices, sizeof(cubeVertices), cubeBl));
+		VertexBufferLayout cubeBl = { ShaderDataType::Float3, ShaderDataType::Float3, ShaderDataType::Float2 };
+		cubeVBO.reset(VertexBuffer::create(cubeVertices.data(), sizeof(TPVertexNormalised) * cubeVertices.size(), TPVertexNormalised::GetLayout()));
 
 		cubeIBO.reset(IndexBuffer::create(cubeIndices, 36));
 		cubeVAO->addVertexBuffer(cubeVBO);
@@ -193,7 +320,7 @@ namespace Engine {
 		std::shared_ptr<IndexBuffer> pyramidIBO;
 
 		pyramidVAO.reset(VertexArray::create());
-		pyramidVBO.reset(VertexBuffer::create(pyramidVertices, sizeof(pyramidVertices), cubeBl));
+		pyramidVBO.reset(VertexBuffer::create(pyramidVertices.data(), sizeof(TPVertex)*pyramidVertices.size(), cubeBl));
 		pyramidIBO.reset(IndexBuffer::create(pyramidIndices, 18));
 		pyramidVAO->addVertexBuffer(pyramidVBO);
 		pyramidVAO->setIndexBuffer(pyramidIBO);
@@ -244,6 +371,18 @@ namespace Engine {
 		);
 		glm::mat4 projection = glm::perspective(glm::radians(45.f), 1024.f / 800.f, 0.1f, 100.f);
 
+		//Camera UBO
+		uint32_t blockNumber = 0;
+
+		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
+		std::shared_ptr<UniformBuffer> cameraUBO;
+		cameraUBO.reset(UniformBuffer::create (camLayout));
+
+		cameraUBO->attachShaderBlock(tpShader, "b_camera");
+
+		cameraUBO->uploadData("u_projection", glm::value_ptr(projection));
+		cameraUBO->uploadData("u_view", glm::value_ptr(view));
+;
 		glm::mat4 models[3];
 		models[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-2.f, 0.f, -6.f));
 		models[1] = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -6.f));
@@ -256,8 +395,8 @@ namespace Engine {
 
 		glm::vec3 lightData[3] = { {1.f, 1.f, 1.f}, {-2.f, 4.f, 6.f}, {0.f, 0.f, 0.f} };
 
-		swu3D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view)));
-		swu3D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection)));
+
+
 		swu3D["u_lightColour"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[0])));
 		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
 		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[2])));
@@ -318,8 +457,8 @@ namespace Engine {
 
 			Renderer2D::begin(swu2D);
 			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
-			Renderer2D::submit(quads[1], letterTexture);
-			Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
+			//Renderer2D::submit(quads[1], letterTexture);
+			//Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
 
 			uint32_t x = 550.f;
 			Renderer2D::submit('g', { x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
