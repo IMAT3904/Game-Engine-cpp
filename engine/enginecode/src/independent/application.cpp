@@ -171,17 +171,17 @@ namespace Engine {
 		return result;
 	}
 
-	uint32_t pack(const glm::vec4& colour)
-	{
-		uint32_t result = 0;
-		uint32_t r = (static_cast<uint32_t>(colour.r * 255.0f)) <<0; //000R
-		uint32_t g = (static_cast<uint32_t>(colour.g * 255.0f)) <<8; //00B0
-		uint32_t b = (static_cast<uint32_t>(colour.b * 255.0f)) <<16;//0G00
-		uint32_t a = (static_cast<uint32_t>(colour.a * 255.0f)) <<24;//A
+	//uint32_t pack(const glm::vec4& colour)
+	//{
+	//	uint32_t result = 0;
+	//	uint32_t r = (static_cast<uint32_t>(colour.r * 255.0f)) <<0; //000R
+	//	uint32_t g = (static_cast<uint32_t>(colour.g * 255.0f)) <<8; //00B0
+	//	uint32_t b = (static_cast<uint32_t>(colour.b * 255.0f)) <<16;//0G00
+	//	uint32_t a = (static_cast<uint32_t>(colour.a * 255.0f)) <<24;//A
 
-		result = (r | g | b | a);
-		return result;
-	}
+	//	result = (r | g | b | a);
+	//	return result;
+	//}
 
 	uint32_t pack(const glm::vec3& colour)
 	{
@@ -461,12 +461,17 @@ namespace Engine {
 			//Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
 
 			uint32_t x = 550.f;
+			Renderer2D::flush();
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
 			Renderer2D::submit('g', { x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 			Renderer2D::submit('o', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 			Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 			Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 			Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 			Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+
+
 			Renderer2D::end();
 
 			glDisable(GL_BLEND);

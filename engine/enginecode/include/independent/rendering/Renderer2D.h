@@ -10,6 +10,7 @@
 #include "rendering/subTexture.h"
 #include <unordered_map>
 #include <array>
+#include <numeric>
 namespace Engine
 {
 	class Renderer2DVertex
@@ -67,7 +68,7 @@ namespace Engine
 		static void submit(const Quad& quad, const glm::vec4& tint, const SubTexture& texture,float angle, bool degrees = false); //!< Render a textured and tinted quad;
 		
 		static void submit(char ch, const glm::vec2& position, float& advance, const glm::vec4 tint); //!< Render a single character with a tint
-		
+		static void flush();
 		static void end();
 	private:
 		struct InternalData
@@ -78,7 +79,7 @@ namespace Engine
 			std::shared_ptr<Shader> shader;
 			std::shared_ptr<VertexArray> VAO;
 			std::shared_ptr<UniformBuffer> UBO;
-			std::array<Renderer2DVertex, 4> vertices;
+			std::vector<Renderer2DVertex> vertices;
 			std::array<glm::vec4, 4> quads;
 			std::array<int32_t, 32> textureUnits;
 			glm::mat4 model;
@@ -91,6 +92,8 @@ namespace Engine
 			unsigned char first_char;
 			unsigned char last_char;
 			std::unordered_map<unsigned char, CharacterData> charactersData;
+			static const uint32_t batchSize = 8192;
+			uint32_t drawCount;
 		};
 
 		static std::shared_ptr<InternalData> s_data;
