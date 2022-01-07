@@ -1,6 +1,6 @@
 /* \file textureAtlass.cpp */
 
-#include "engine.h"
+#include "engine_pch.h"
 #include "rendering/textureAtlas.h"
 #include <stb_image.h>
 
@@ -21,7 +21,7 @@ namespace Engine
 		
 		return false;
 	}
-	bool TextureAtlas::add(uint32_t width, uint32_t height, uint32_t channels, unsigned char* data, SubTexture& result)
+	bool TextureAtlas::add(int32_t width, int32_t height, uint32_t channels, unsigned char* data, SubTexture& result)
 	{
 		if (channels != getChannels())
 			return false; //Early exit as channels don't match
