@@ -10,7 +10,7 @@
 #include "rendering/shader.h"
 #include "rendering/vertexArray.h"
 #include "rendering/TextureUnitManager.h"
-
+#include "rendering/RenderCommands.h"
 
 namespace Engine
 {
@@ -22,6 +22,7 @@ namespace Engine
 	{
 	public:
 		static TextureUnitManager texUnitMan;
+		static void actionCommand(std::shared_ptr<RenderCommand>& command) { command->m_action(); }
 	};
 
 	

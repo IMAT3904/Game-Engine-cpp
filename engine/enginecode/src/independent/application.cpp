@@ -407,11 +407,21 @@ namespace Engine {
 
 		float timestep = 0.f;
 
-	
-		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+
+
+		{
+			std::shared_ptr<RenderCommand> setClearCommand;
+			setClearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::setClearColour,1.f,0.f,1.f,1.f));
+			RendererCommon::actionCommand(setClearCommand);
+		}
+		//glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
 		Renderer2D::init();
+
+		std::shared_ptr<RenderCommand> clearCommand;
+		clearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::clearColurAndDepthBuffer));
 
 		float advance;
 
@@ -440,8 +450,8 @@ namespace Engine {
 			for (auto& model : models) { model = glm::rotate(model, timestep, glm::vec3(0.f, 1.0, 0.f)); }
 
 			// Do frame stuff
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			RendererCommon::actionCommand(clearCommand);
 			
 			Renderer3D::begin(swu3D);
 			glEnable(GL_DEPTH_TEST);
