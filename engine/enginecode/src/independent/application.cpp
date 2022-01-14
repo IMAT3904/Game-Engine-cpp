@@ -415,7 +415,7 @@ namespace Engine {
 			setClearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::setClearColour,1.f,0.f,1.f,1.f));
 			RendererCommon::actionCommand(setClearCommand);
 		}
-		//glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
 		Renderer2D::init();
@@ -469,18 +469,21 @@ namespace Engine {
 			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
 			//Renderer2D::submit(quads[1], letterTexture);
 			//Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
-
-			uint32_t x = 550.f;
 			Renderer2D::flush();
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-			Renderer2D::submit('g', { x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			Renderer2D::submit('o', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			uint32_t x = 550.f;
+			//glEnable(GL_BLEND);
+			//glBlendFunc(GL_ONE, GL_ONE);
+			Renderer2D::submit('H', { x,550.f },advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			Renderer2D::submit('e', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			Renderer2D::submit('o', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
 
+	
+			//Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			//Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			//Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			//Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 
 			Renderer2D::end();
 

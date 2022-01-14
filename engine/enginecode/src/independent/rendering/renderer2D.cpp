@@ -158,8 +158,8 @@ namespace Engine
 				s_data->fontTexture->edit(texPosX, texPosY, glyphWidth, glyphHeight, glyphRGBABuffer);
 				free(glyphRGBABuffer);
 
-				glm::vec2 uvStart(texPosX / textureWidth, texPosY /textureHeight);
-				glm::vec2 uvEnd((texPosX +glyphWidth) / textureWidth, (texPosY +glyphHeight) /textureHeight);
+				glm::vec2 uvStart((float)texPosX / textureWidth, (float) texPosY / textureHeight);
+				glm::vec2 uvEnd(((float)texPosX +glyphWidth) / textureWidth, ((float)texPosY +glyphHeight) /textureHeight);
 
 				cData.subTexture = SubTexture(s_data->fontTexture, uvStart, uvEnd);
 
@@ -332,7 +332,7 @@ namespace Engine
 		//submit(quad, glm::vec4(1), s_data->fontTexture);
 		
 		auto& cData = s_data->charactersData[ch];
-
+		advance = cData.advance;
 		glm::vec2 centre = position + cData.glyphBearing + cData.glyphSize * 0.5f;
 		glm::vec2 he = cData.glyphSize * 0.5f;
 		

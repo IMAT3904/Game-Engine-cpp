@@ -24,6 +24,26 @@ namespace Engine
 			RenderCommand* result = new RenderCommand;
 			switch (command)
 			{
+			case RenderCommand::Commands::clearDepthBuffer:
+				result->m_action = clearDepthBufferCommand();
+				return result;
+				break;
+			case RenderCommand::Commands::clearColourBuffer:
+				result->m_action = clearColourBufferCommand();
+				return result;
+				break;
+			case RenderCommand::Commands::enableDepthTest:
+				result->m_action = enableDepthTestCommand();
+				return result;
+				break;
+			case RenderCommand::Commands::disableDepthTest:
+				result->m_action = disableDepthTestCommand();
+				return result;
+				break;
+			case RenderCommand::Commands::enableBlending:
+				result->m_action = enableBlendingCommand();
+				return result;
+				break;
 			case RenderCommand::Commands::clearColurAndDepthBuffer:
 				result->m_action = getClearColourAndDepthBufferCommand();
 				return result;
@@ -44,6 +64,11 @@ namespace Engine
 			}
 		}
 	private:
+		static std::function<void(void)> clearDepthBufferCommand();
+		static std::function<void(void)> clearColourBufferCommand();
+		static std::function<void(void)> enableDepthTestCommand();
+		static std::function<void(void)> disableDepthTestCommand();
+		static std::function<void(void)> enableBlendingCommand();
 		static std::function<void(void)> getClearColourAndDepthBufferCommand();
 		static std::function<void(void)> getsetColourCommand(float r, float g, float b, float a);
 		template<typename G,size_t I, typename... Ts>
