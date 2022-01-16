@@ -29,6 +29,8 @@
 #include "rendering/Renderer2D.h"
 #include "rendering/uniformBuffer.h"
 
+#include "rendering/camera.h"
+
 namespace Engine {
 	// Set static vars
 	Application* Application::s_instance = nullptr;
@@ -75,9 +77,6 @@ namespace Engine {
 
 	Application::~Application()
 	{
-
-
-
 		//Stop windows
 		m_windowsSystem->stop();
 
@@ -363,33 +362,32 @@ namespace Engine {
 
 
 #pragma endregion
+		
+		m_mainCamera.reset(new Camera(m_window->getWidth(), m_window->getHeight(), {0,0,0}));
+		//m_mainCamera->Matrix(45.0f, 1.f, 10.f);
 
-		glm::mat4 view = glm::lookAt(
-			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.f, 0.f, -1.f),
-			glm::vec3(0.f, 1.f, 0.f)
-		);
-		glm::mat4 projection = glm::perspective(glm::radians(45.f), 1024.f / 800.f, 0.1f, 100.f);
+
 
 		//Camera UBO
 		uint32_t blockNumber = 0;
 
-		UniformBufferLayout camLayout = { {"u_projection",ShaderDataType::Mat4}, {"u_view",ShaderDataType::Mat4} };
+		UniformBufferLayout camLayout = {{"u_view",ShaderDataType::Mat4},{"u_projection",ShaderDataType::Mat4} };
 		std::shared_ptr<UniformBuffer> cameraUBO;
 		cameraUBO.reset(UniformBuffer::create (camLayout));
 
 		cameraUBO->attachShaderBlock(tpShader, "b_camera");
 
-		cameraUBO->uploadData("u_projection", glm::value_ptr(projection));
-		cameraUBO->uploadData("u_view", glm::value_ptr(view));
+
 ;
 		glm::mat4 models[3];
 		models[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-2.f, 0.f, -6.f));
 		models[1] = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -6.f));
 		models[2] = glm::translate(glm::mat4(1.0f), glm::vec3(2.f, 0.f, -6.f));
 
-		glm::mat4 view2D = glm::mat4(1.f);
-		glm::mat4 projection2D = glm::ortho(0.f, static_cast<float>(m_window->getWidth()), static_cast<float>(m_window->getHeight()),0.f);
+
+
+		//glm::mat4 view2D = glm::mat4(1.f);
+		//glm::mat4 projection2D = glm::ortho(0.f, static_cast<float>(m_window->getWidth()), static_cast<float>(m_window->getHeight()),0.f);
 
 		SceneWideUniforms swu3D;
 
@@ -397,16 +395,22 @@ namespace Engine {
 
 
 
+		//glm::mat4 projection = glm::perspective(glm::radians(m_mainCamera->Zoom), (float)m_window->getWidth() / (float)(float)m_window->getHeight(), 0.1f, 1000.0f);
+		//glm::mat4 view = m_mainCamera->GetViewMatrix();
+
+
+
+		//swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->Position)));
+
 		swu3D["u_lightColour"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[0])));
 		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
-		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[2])));
+		
 
-		SceneWideUniforms swu2D;
-		swu2D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view2D)));
-		swu2D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection2D)));
+		//SceneWideUniforms swu2D;
+		//swu2D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view2D)));
+		//swu2D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection2D)));
 
 		float timestep = 0.f;
-
 
 
 
@@ -415,10 +419,10 @@ namespace Engine {
 			setClearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::setClearColour,1.f,0.f,1.f,1.f));
 			RendererCommon::actionCommand(setClearCommand);
 		}
-		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		//glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
-		Renderer2D::init();
+		//Renderer2D::init();
 
 		std::shared_ptr<RenderCommand> clearCommand;
 		clearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::clearColurAndDepthBuffer));
@@ -435,12 +439,22 @@ namespace Engine {
 		};
 			
 
-
+		float lastX = InputPoller::getMouseX();
+		float lastY = InputPoller::getMouseY();
 
 		while (m_running)
 		{
 			timestep = m_timer->getElapsedTime();
 			m_timer->reset();
+
+			glMatrixMode(GL_PROJECTION);
+			glBindBuffer(GL_UNIFORM_BUFFER, cameraUBO->GetRenderID());
+			m_mainCamera->Input(timestep);
+			m_mainCamera->Matrix(60.0f, 1.f, 10.f);
+			cameraUBO->attachShaderBlock(tpShader, "b_camera");
+			cameraUBO->uploadData("u_projection", glm::value_ptr(m_mainCamera->projection));
+			cameraUBO->uploadData("u_view", glm::value_ptr(m_mainCamera->view));
+			swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->position)));
 			//Log::trace("FPS {0}", 1.0f / timestep);
 			//if (InputPoller::isKeyPressed(NG_KEY_W)) Log::error("W Pressed");
 			//if (InputPoller::isMouseButtonPressed(NG_MOUSE_BUTTON_1)) Log::error("Left Mouse Button Pressed");
@@ -453,45 +467,45 @@ namespace Engine {
 			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RendererCommon::actionCommand(clearCommand);
 			
-			Renderer3D::begin(swu3D);
 			glEnable(GL_DEPTH_TEST);
+			Renderer3D::begin(swu3D);
+
 			Renderer3D::submit(pyramidVAO, pyramidMat, models[0]);
 			Renderer3D::submit(cubeVAO, letterCubeMat, models[1]);
 			Renderer3D::submit(cubeVAO, numberCubeMat, models[2]);
 
 			Renderer3D::end();
 
-			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			Renderer2D::begin(swu2D);
-			Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
-			//Renderer2D::submit(quads[1], letterTexture);
-			//Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
-			Renderer2D::flush();
-			uint32_t x = 550.f;
+			//glDisable(GL_DEPTH_TEST);
 			//glEnable(GL_BLEND);
-			//glBlendFunc(GL_ONE, GL_ONE);
-			Renderer2D::submit('H', { x,550.f },advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			Renderer2D::submit('e', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			Renderer2D::submit('o', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			//Renderer2D::begin(swu2D);
+			//Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
+			////Renderer2D::submit(quads[1], letterTexture);
+			////Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
+			//Renderer2D::flush();
+			//uint32_t x = 550.f;
+			////glEnable(GL_BLEND);
+			////glBlendFunc(GL_ONE, GL_ONE);
+			//Renderer2D::submit('H', { x,550.f },advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			//Renderer2D::submit('e', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			//Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			//Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			//Renderer2D::submit('o', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
 
 	
-			//Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			//Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			//Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			//Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			////Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			////Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			////Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			////Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
 
-			Renderer2D::end();
+			//Renderer2D::end();
 
-			glDisable(GL_BLEND);
+			//glDisable(GL_BLEND);
 
 			m_window->onUpdate(timestep);
 		}
-
 
 	}
 

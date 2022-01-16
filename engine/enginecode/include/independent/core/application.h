@@ -8,7 +8,7 @@
 #include "systems/eventdispatcher.h"
 #include "core/window.h"
 #include "core/inputPoller.h"
-
+#include "rendering/camera.h"
 namespace Engine {
 
 	/**
@@ -27,6 +27,7 @@ namespace Engine {
 		std::shared_ptr<System> m_windowsSystem; //!< Windows system
 		std::shared_ptr<Window> m_window; //!< Window
 				void onEvent(Event& e); //!< Called when an event happens
+				std::shared_ptr<Camera> m_mainCamera;
 		bool onWindowResize(WindowResizeEvent& e);
 		bool onWindowClose(WindowCloseEvent& e);
 		bool onWindowFocus(WindowFocusEvent& e);
