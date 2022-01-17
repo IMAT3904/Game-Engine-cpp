@@ -4,14 +4,15 @@
 
 #include <cstdarg>
 //#include "systems/log.h"
-/**
-\class Interface class for all systems
-*/
 
 namespace Engine {
 
 	enum class SystemSignal { None = 0 };
 
+	/**
+	\class System 
+	\brief Interface class for all systems
+	*/
 	class System
 	{
 	public:

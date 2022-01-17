@@ -4,7 +4,7 @@
 #include "core/graphicsCotext.h"
 
 
-// Targeting Windows 10 only
+// Targeting Windows 10 and Windows 11 only
 
 #define WINVER 0x0A00
 #define _WIN32_WINNT 0x0A00
@@ -12,6 +12,11 @@
 #include <windows.h>
 namespace Engine 
 {
+	/**
+	\class Win32_OpenGL_GC
+	\brief Win32 Graphic Context.
+	*/
+
 	class Win32_OpenGL_GC : public GraphicsContext
 	{
 	public:

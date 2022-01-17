@@ -8,6 +8,10 @@
 
 namespace Engine
 {
+	/**
+	\class Log
+	\brief System logger that writes application messages to console.
+	*/
 	class Log : public System
 	{
 	public:
@@ -15,24 +19,24 @@ namespace Engine
 		virtual void stop(SystemSignal close = SystemSignal::None, ...) override; //!< Stop the logger
 
 		template<class ...Args>
-		static void info(Args&&... args);
+		static void info(Args&&... args); //!< Display information message.
 
 		template<class ...Args>
-		static void debug(Args&... args);
+		static void debug(Args&... args); //!< Display debug message.
 
 		template<class ...Args>
-		static void error(Args&... args);
+		static void error(Args&... args); //!< Display error message.
 
 		template<class ...Args>
-		static void warn(Args&... args);
+		static void warn(Args&... args); //!< Display warning message.
 
 		template<class ...Args>
-		static void trace(Args&... args);
+		static void trace(Args&... args); //!< Trace message.
 
-		static bool running;
+		static bool running; //!< Is the logger running?
 
 	private:
-		static std::shared_ptr<spdlog::logger> s_consoleLogger; //!< Console
+		static std::shared_ptr<spdlog::logger> s_consoleLogger; //!< Console logger instance.
 	};
 
 	template<class ...Args>

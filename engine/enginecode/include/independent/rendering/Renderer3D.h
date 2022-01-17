@@ -13,38 +13,38 @@ namespace Engine
 
 
 	/* \class Material
-	* \brief hold a shader and the uniform data associated with that shader
+	* \brief hold a shader and the uniform data associated with that shader.
 
 	*/
 	class Material
 	{
 	public:
-		Material(const std::shared_ptr<Shader>& shader):
+		Material(const std::shared_ptr<Shader>& shader): //!< Constructor with parameters.
 			m_shader(shader),m_flags(0),m_texture(nullptr),m_tint(glm::vec4(0.f))
 		{}
-		Material(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture>& texture, const glm::vec4& tint) :
+		Material(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture>& texture, const glm::vec4& tint) : //!< Constructor with parameters.
 			m_shader(shader), m_texture(texture), m_tint(tint)
 		{
 			setFlag(flag_texture | flag_tint);
 		}
-		Material(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture>& texture) :
+		Material(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture>& texture) : //!< Constructor with parameters.
 			m_shader(shader), m_texture(texture), m_tint(glm::vec4(0.f))
 		{
 			setFlag(flag_texture);
 		}
-		Material(const std::shared_ptr<Shader>& shader, const glm::vec4& tint) :
+		Material(const std::shared_ptr<Shader>& shader, const glm::vec4& tint) : //!< Constructor with parameters.
 			m_shader(shader), m_texture(nullptr), m_tint(tint)
 		{
 			setFlag(flag_tint);
 		}
 
-		inline std::shared_ptr<Shader> getShader() const { return m_shader; }
-		inline std::shared_ptr<Texture> getTexture() const { return m_texture; }
-		inline glm::vec4 getTint() const { return m_tint; }
-		bool isFlagSet(uint32_t flag) const { return m_flags & flag; }
+		inline std::shared_ptr<Shader> getShader() const { return m_shader; } //!< Get curently bound shader.
+		inline std::shared_ptr<Texture> getTexture() const { return m_texture; } //!< Get curently bound Texture. 
+		inline glm::vec4 getTint() const { return m_tint; } //!<Get Tint.
+		bool isFlagSet(uint32_t flag) const { return m_flags & flag; } //!< Is given flag set?
 
-		void setTexture(const std::shared_ptr<Texture>& texture) { m_texture = texture; }
-		void setTint(const glm::vec4& tint) { m_tint = tint; }
+		void setTexture(const std::shared_ptr<Texture>& texture) { m_texture = texture; } //!< Set texture.
+		void setTint(const glm::vec4& tint) { m_tint = tint; } //!< Set tint.
 
 		constexpr static uint32_t flag_texture = 1 << 0; //!< 00000001
 		constexpr static uint32_t flag_tint = 1 << 1;    //!< 00000010
@@ -53,7 +53,7 @@ namespace Engine
 		std::shared_ptr<Shader> m_shader; //!< The materials on shader
 		std::shared_ptr<Texture> m_texture; //!< The texture to be applied to the material
 		glm::vec4 m_tint; //!< Colour tint to be applied to some geometry
-		void setFlag(uint32_t flag) { m_flags = m_flags | flag; }
+		void setFlag(uint32_t flag) { m_flags = m_flags | flag; } //!< Set flag.
 	};
 
 

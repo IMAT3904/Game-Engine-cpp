@@ -9,26 +9,18 @@
 #include "platform/GLFW/GLFWSystem.h"
 #endif
 
-
-
-
 #include<glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "rendering/indexBuffer.h"
 #include "rendering/shader.h"
 #include "rendering/texture.h"
-
 #include "rendering/vertexBuffer.h"
 #include "rendering/vertexArray.h"
-
 #include "rendering/subTexture.h"
-
-
 #include "rendering/Renderer3D.h"
 #include "rendering/Renderer2D.h"
 #include "rendering/uniformBuffer.h"
-
 #include "rendering/camera.h"
 
 namespace Engine {
@@ -50,7 +42,6 @@ namespace Engine {
 		m_timer.reset(new Timer);
 		m_timer->start();
 
-
 		//Start windows system
 #ifdef NG_PLATFORM_WINDOWS
 		m_windowsSystem.reset(new GLFWSystem);
@@ -63,8 +54,6 @@ namespace Engine {
 
 		m_window->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
 		InputPoller::setNativeWindow(m_window->getNativeWindow());
-
-
 
 		//Little experiment
 		// m_timer->start();
@@ -170,25 +159,12 @@ namespace Engine {
 		return result;
 	}
 
-	//uint32_t pack(const glm::vec4& colour)
-	//{
-	//	uint32_t result = 0;
-	//	uint32_t r = (static_cast<uint32_t>(colour.r * 255.0f)) <<0; //000R
-	//	uint32_t g = (static_cast<uint32_t>(colour.g * 255.0f)) <<8; //00B0
-	//	uint32_t b = (static_cast<uint32_t>(colour.b * 255.0f)) <<16;//0G00
-	//	uint32_t a = (static_cast<uint32_t>(colour.a * 255.0f)) <<24;//A
-
-	//	result = (r | g | b | a);
-	//	return result;
-	//}
-
 	uint32_t pack(const glm::vec3& colour)
 	{
 		return pack({ colour.x, colour.y, colour.z, 1.f });
 	}
 
 #pragma endregion
-
 
 	void Application::run()
 	{
@@ -221,34 +197,6 @@ namespace Engine {
 		cubeVertices.at(22) = TPVertexNormalised({ 0.5f,  0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 0.5f}));
 		cubeVertices.at(23) = TPVertexNormalised({ 0.5f, -0.5f, 0.5f },normalise({1.f,  0.f,  0.f}),normalise({0.66f, 1.0f}));
 
-
-		//float cubeVertices[8 * 24] = {
-		//	//	 <------ Pos ------>  <--- normal --->  <-- UV -->
-		//		 0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.f ,
-		//		 0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.f,   0.5f,
-		//		-0.5f, -0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.5f,
-		//		-0.5f,  0.5f, -0.5f,  0.f,  0.f, -1.f,  0.33f, 0.f ,
-		//		-0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33f, 0.5f,
-		//		 0.5f, -0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.5f,
-		//		 0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.66f, 0.f ,
-		//		-0.5f,  0.5f, 0.5f,   0.f,  0.f,  1.f,  0.33,  0.f ,
-		//		-0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  1.f,   0.f ,
-		//		 0.5f, -0.5f, -0.5f,  0.f, -1.f,  0.f,  0.66f, 0.f ,
-		//		 0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  0.66f, 0.5f,
-		//		-0.5f, -0.5f, 0.5f,   0.f, -1.f,  0.f,  1.0f,  0.5f,
-		//		 0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.f,   0.5f,
-		//		 0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.f,   1.0f,
-		//		-0.5f,  0.5f, -0.5f,  0.f,  1.f,  0.f,  0.33f, 1.0f,
-		//		-0.5f,  0.5f, 0.5f,   0.f,  1.f,  0.f,  0.3f,  0.5f,
-		//		-0.5f,  0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 0.5f,
-		//		-0.5f,  0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 0.5f,
-		//		-0.5f, -0.5f, -0.5f, -1.f,  0.f,  0.f,  0.33f, 1.0f,
-		//		-0.5f, -0.5f, 0.5f,  -1.f,  0.f,  0.f,  0.66f, 1.0f,
-		//		 0.5f, -0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  1.0f,
-		//		 0.5f,  0.5f, -0.5f,  1.f,  0.f,  0.f,  1.0f,  0.5f,
-		//		 0.5f,  0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 0.5f,
-		//		 0.5f, -0.5f, 0.5f,   1.f,  0.f,  0.f,  0.66f, 1.0f
-		//};
 
 		std::vector<TPVertex> pyramidVertices(16);
 
@@ -337,15 +285,20 @@ namespace Engine {
 #pragma region TEXTURES
 		std::shared_ptr<Texture> letterTexture;
 		std::shared_ptr<Texture> numberTexture;
+		std::shared_ptr<Texture> cameraTexture;
+		std::shared_ptr<Texture> woodTexture;
 
 		letterTexture.reset(Texture::create("assets/textures/letterCube.png"));
 		numberTexture.reset(Texture::create("assets/textures/numberCube.png"));
+		cameraTexture.reset(Texture::create("assets/textures/video-camera.png"));
+		woodTexture.reset(Texture::create("assets/textures/wooden-box.png"));
 
 		unsigned char whitePX[4] = { 255,255,255,255 };
 		std::shared_ptr<Texture> plainWhiteTexture;
 		plainWhiteTexture.reset(Texture::create(1, 1, 4, whitePX));
 		SubTexture letterCube(letterTexture, { 0.f,0.f }, { 1.f,0.5f });
 		SubTexture number(letterTexture, { 0.f,0.5f }, { 1.f,1.f });
+		SubTexture camera(cameraTexture, { 0.f,0.f }, { 1.f,1.f });
 		
 #pragma endregion
 
@@ -354,19 +307,20 @@ namespace Engine {
 		std::shared_ptr<Material> pyramidMat;
 		std::shared_ptr<Material> letterCubeMat;
 		std::shared_ptr<Material> numberCubeMat;
+		std::shared_ptr<Material> woodMat;
 
 		pyramidMat.reset(new Material(tpShader, { 0.3f, 0.9f, 4.f, 1.f }));
 		letterCubeMat.reset(new Material(tpShader, letterTexture));
 		numberCubeMat.reset(new Material(tpShader, numberTexture));
-		
-
+		woodMat.reset(new Material(tpShader, woodTexture));
 
 #pragma endregion
-		
+
+		glm::mat4 anotherCube = glm::translate(glm::mat4(1.0f), glm::vec3(4.f, 0.f, -6.f));
+
 		m_mainCamera.reset(new Camera(m_window->getWidth(), m_window->getHeight(), {0,0,0}));
-		//m_mainCamera->Matrix(45.0f, 1.f, 10.f);
-
-
+		m_mainCameraActive = true;
+		m_followCamera.reset(new FollowCamera(m_window->getWidth(), m_window->getHeight(), &anotherCube));
 
 		//Camera UBO
 		uint32_t blockNumber = 0;
@@ -376,8 +330,6 @@ namespace Engine {
 		cameraUBO.reset(UniformBuffer::create (camLayout));
 
 		cameraUBO->attachShaderBlock(tpShader, "b_camera");
-
-
 ;
 		glm::mat4 models[3];
 		models[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-2.f, 0.f, -6.f));
@@ -385,124 +337,126 @@ namespace Engine {
 		models[2] = glm::translate(glm::mat4(1.0f), glm::vec3(2.f, 0.f, -6.f));
 
 
-
-		//glm::mat4 view2D = glm::mat4(1.f);
-		//glm::mat4 projection2D = glm::ortho(0.f, static_cast<float>(m_window->getWidth()), static_cast<float>(m_window->getHeight()),0.f);
+		glm::mat4 view2D = glm::mat4(1.f);
+		glm::mat4 projection2D = glm::ortho(0.f, static_cast<float>(m_window->getWidth()), static_cast<float>(m_window->getHeight()),0.f);
 
 		SceneWideUniforms swu3D;
 
 		glm::vec3 lightData[3] = { {1.f, 1.f, 1.f}, {-2.f, 4.f, 6.f}, {0.f, 0.f, 0.f} };
 
-
-
-		//glm::mat4 projection = glm::perspective(glm::radians(m_mainCamera->Zoom), (float)m_window->getWidth() / (float)(float)m_window->getHeight(), 0.1f, 1000.0f);
-		//glm::mat4 view = m_mainCamera->GetViewMatrix();
-
-
-
-		//swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->Position)));
-
+		swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->position)));
 		swu3D["u_lightColour"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[0])));
 		swu3D["u_lightPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(lightData[1])));
 		
 
-		//SceneWideUniforms swu2D;
-		//swu2D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view2D)));
-		//swu2D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection2D)));
+		SceneWideUniforms swu2D;
+		swu2D["u_view"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(view2D)));
+		swu2D["u_projection"] = std::pair<ShaderDataType, void*>(ShaderDataType::Mat4, static_cast<void*>(glm::value_ptr(projection2D)));
 
 		float timestep = 0.f;
-
-
 
 		{
 			std::shared_ptr<RenderCommand> setClearCommand;
 			setClearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::setClearColour,1.f,0.f,1.f,1.f));
 			RendererCommon::actionCommand(setClearCommand);
 		}
-		//glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 		Renderer3D::init();
-		//Renderer2D::init();
+		Renderer2D::init();
 
 		std::shared_ptr<RenderCommand> clearCommand;
 		clearCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::clearColurAndDepthBuffer));
 
+		std::shared_ptr<RenderCommand> depthTestCommand;
+		depthTestCommand.reset(RenderCommandFactory::createCommand(RenderCommand::Commands::enableDepthTest));
+
 		float advance;
 
-
-		Quad quads[3] =
+		Quad quads[2] =
 		{
-			Quad::createCentreHalfExtents({ 400, 200 }, { 100.f, 50.f }),
-			Quad::createCentreHalfExtents({ 200, 300 }, { 50, 100.f }),
-			Quad::createCentreHalfExtents({ 500, 500 }, { 75, 75.f }),
-
+			Quad::createCentreHalfExtents({ 0, 0 }, { 1024, 100.f }),
+			Quad::createCentreHalfExtents({ 950, 50 }, { 50, 50.f }),
 		};
-			
-
-		float lastX = InputPoller::getMouseX();
-		float lastY = InputPoller::getMouseY();
 
 		while (m_running)
 		{
 			timestep = m_timer->getElapsedTime();
 			m_timer->reset();
 
-			glMatrixMode(GL_PROJECTION);
 			glBindBuffer(GL_UNIFORM_BUFFER, cameraUBO->GetRenderID());
-			m_mainCamera->Input(timestep);
-			m_mainCamera->Matrix(60.0f, 1.f, 10.f);
 			cameraUBO->attachShaderBlock(tpShader, "b_camera");
-			cameraUBO->uploadData("u_projection", glm::value_ptr(m_mainCamera->projection));
-			cameraUBO->uploadData("u_view", glm::value_ptr(m_mainCamera->view));
-			swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->position)));
+
+			if (m_mainCameraActive)
+			{
+				m_mainCamera->Input(timestep);
+				cameraUBO->uploadData("u_projection", glm::value_ptr(m_mainCamera->projection));
+				cameraUBO->uploadData("u_view", glm::value_ptr(m_mainCamera->view));
+				swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_mainCamera->position)));
+			}
+			else
+			{
+				m_followCamera->Input(timestep);
+				cameraUBO->uploadData("u_projection", glm::value_ptr(m_followCamera->projection));
+				cameraUBO->uploadData("u_view", glm::value_ptr(m_followCamera->view));
+				swu3D["u_viewPos"] = std::pair<ShaderDataType, void*>(ShaderDataType::Float3, static_cast<void*>(glm::value_ptr(m_followCamera->position)));
+			}
+
 			//Log::trace("FPS {0}", 1.0f / timestep);
-			//if (InputPoller::isKeyPressed(NG_KEY_W)) Log::error("W Pressed");
-			//if (InputPoller::isMouseButtonPressed(NG_MOUSE_BUTTON_1)) Log::error("Left Mouse Button Pressed");
-			//Log::trace("Current mouse pos: ({0}, {1})", InputPoller::getMouseX(), InputPoller::getMouseY());
 
 			GLuint uniformLocation;
 			for (auto& model : models) { model = glm::rotate(model, timestep, glm::vec3(0.f, 1.0, 0.f)); }
 
-			// Do frame stuff
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RendererCommon::actionCommand(clearCommand);
-			
-			glEnable(GL_DEPTH_TEST);
+			RendererCommon::actionCommand(depthTestCommand);
 			Renderer3D::begin(swu3D);
-
 			Renderer3D::submit(pyramidVAO, pyramidMat, models[0]);
 			Renderer3D::submit(cubeVAO, letterCubeMat, models[1]);
 			Renderer3D::submit(cubeVAO, numberCubeMat, models[2]);
+			Renderer3D::submit(cubeVAO, woodMat, anotherCube);
 
 			Renderer3D::end();
 
-			//glDisable(GL_DEPTH_TEST);
-			//glEnable(GL_BLEND);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			//Renderer2D::begin(swu2D);
-			//Renderer2D::submit(quads[0], {0.f,0.f,1.f,1.f});
-			////Renderer2D::submit(quads[1], letterTexture);
-			////Renderer2D::submit(quads[2], {0.f,0.f,1.f,1.f},numberTexture,45.f,true);
-			//Renderer2D::flush();
-			//uint32_t x = 550.f;
-			////glEnable(GL_BLEND);
-			////glBlendFunc(GL_ONE, GL_ONE);
-			//Renderer2D::submit('H', { x,550.f },advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			//Renderer2D::submit('e', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			//Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			//Renderer2D::submit('l', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
-			//Renderer2D::submit('o', {x,550.f }, advance, { 0.f,1.f,0.f,1.f }); x += advance;
+			Renderer2D::begin(swu2D);
+			Renderer2D::submit(quads[0], {0.22f,0.22f,0.22f,0.4f});
+			Renderer2D::submit(quads[1], {1.f,1.f,1.f,1.f}, camera);
+			uint32_t x = 10;
 
-	
-			////Renderer2D::submit(' ', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			////Renderer2D::submit('p', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			////Renderer2D::submit('j', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
-			////Renderer2D::submit('!', {x,550.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			if (m_mainCameraActive)
+			{
+				Renderer2D::submit('F', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('r', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('e', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('e', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit(' ', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('L', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('o', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('o', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('k', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit(' ', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('C', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('a', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('m', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			}
+			else
+			{
+				Renderer2D::submit('F', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('o', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('l', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('l', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('o', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('w', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit(' ', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('C', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('a', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+				Renderer2D::submit('m', { x,80.f }, advance, { 1.f,1.f,1.f,1.f }); x += advance;
+			}
+			Renderer2D::end();
 
-			//Renderer2D::end();
-
-			//glDisable(GL_BLEND);
+			glDisable(GL_BLEND);
 
 			m_window->onUpdate(timestep);
 		}
@@ -526,9 +480,6 @@ namespace Engine {
 		dispatcher.dispatch<MouseButtonReleasedEvent>([this](MouseButtonReleasedEvent& e)->bool {return this->onMouseButtonReleased(e); });
 		dispatcher.dispatch<MouseMovedEvent>([this](MouseMovedEvent& e)->bool {return this->onMouseMoved(e); });
 		dispatcher.dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& e)->bool {return this->onMouseScrolled(e); });
-
-
-
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& e)
@@ -576,6 +527,15 @@ namespace Engine {
 
 	bool Application::onKeyTyped(KeyTypedEvent& e)
 	{
+		if (e.getKeyCode() == NG_KEY_TAB)
+		{
+			if (m_mainCameraActive)
+				m_mainCameraActive = false;
+			else
+				m_mainCameraActive = true;
+		}
+
+		
 		//Log::info("Key  {0} typed", e.getKeyCode());
 		return true;
 	}
@@ -603,10 +563,5 @@ namespace Engine {
 		//Log::info("Mouse  scrolled by : Width {0}. Height {1}", e.getXoffset(), e.getYoffset());
 		return true;
 	}
-
-
-
-
-
 
 }

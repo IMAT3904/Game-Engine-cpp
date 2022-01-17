@@ -5,6 +5,10 @@
 #include <Windows.h>
 namespace Engine
 {
+	/**
+	\class Win32InputPoller
+	\brief Win32 implementation of Input poller.
+	*/
 	class Win32InputPoller
 	{
 	public:

@@ -5,6 +5,10 @@
 
 namespace Engine
 {
+	/**
+	\class TextureUnitManager
+	\brief Manages textures units.
+	*/
 	class TextureUnitManager
 	{
 	public:

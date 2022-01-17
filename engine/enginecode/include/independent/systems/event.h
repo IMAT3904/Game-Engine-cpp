@@ -25,7 +25,8 @@ namespace Engine
 	};
 
 	/**
-	\class Event base class
+	\class Event 
+	\brief Event base class.
 	*/
 
 	class Event

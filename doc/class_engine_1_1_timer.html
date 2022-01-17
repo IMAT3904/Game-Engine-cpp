@@ -52,6 +52,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Basic timer implementation for profiling performance.  
+ <a href="class_engine_1_1_timer.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="timer_8h_source.html">timer.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -66,13 +69,16 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:af10aea71b21c59f73cdb8058bd68d915"><td class="memItemLeft" align="right" valign="top">std::chrono::time_point&lt; std::chrono::high_resolution_clock &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_engine_1_1_timer.html#af10aea71b21c59f73cdb8058bd68d915">m_startPoint</a></td></tr>
+<tr class="memdesc:af10aea71b21c59f73cdb8058bd68d915"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time when starting.  <a href="class_engine_1_1_timer.html#af10aea71b21c59f73cdb8058bd68d915">More...</a><br /></td></tr>
 <tr class="separator:af10aea71b21c59f73cdb8058bd68d915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21b28b9c384ce18482a936cc4e14711a"><td class="memItemLeft" align="right" valign="top">std::chrono::time_point&lt; std::chrono::high_resolution_clock &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_engine_1_1_timer.html#a21b28b9c384ce18482a936cc4e14711a">m_endPoint</a></td></tr>
+<tr class="memdesc:a21b28b9c384ce18482a936cc4e14711a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time when ending.  <a href="class_engine_1_1_timer.html#a21b28b9c384ce18482a936cc4e14711a">More...</a><br /></td></tr>
 <tr class="separator:a21b28b9c384ce18482a936cc4e14711a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00009">9</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<div class="textblock"><p>Basic timer implementation for profiling performance. </p>
+
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00013">13</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa48536bbafaa57bc40cd91f69a665c12"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa48536bbafaa57bc40cd91f69a665c12">&#9670;&nbsp;</a></span>getElapsedTime()</h2>
@@ -97,7 +103,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00020">20</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00024">24</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 
 </div>
 </div>
@@ -124,7 +130,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00016">16</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00020">20</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 
 </div>
 </div>
@@ -151,7 +157,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00012">12</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00016">16</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 
 </div>
 </div>
@@ -176,7 +182,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00028">28</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<p>Time when ending. </p>
+
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00032">32</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 
 </div>
 </div>
@@ -200,7 +208,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00027">27</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
+<p>Time when starting. </p>
+
+<p class="definition">Definition at line <a class="el" href="timer_8h_source.html#l00031">31</a> of file <a class="el" href="timer_8h_source.html">timer.h</a>.</p>
 
 </div>
 </div>

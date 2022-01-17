@@ -19,7 +19,8 @@ namespace Engine
 
 		s_data.reset(new InternalData);
 
-		s_data->textureUnits = { 0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
+		s_data->textureUnits = { 0, 1,2,3,4,5};
+		//s_data->textureUnits = { 0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
 
 
 		unsigned char whitePX[4] = { 255,255,255,255 };
@@ -37,7 +38,7 @@ namespace Engine
 	})));
 
 
-		s_data->shader->uploadIntArray("u_texData", s_data->textureUnits.data(), 32);
+		s_data->shader->uploadIntArray("u_texData", s_data->textureUnits.data(), 6);
 
 		s_data->quads[0] = { -0.5f, -0.5f,1,1 };
 		s_data->quads[1] = { -0.5f,  0.5f,1,1 };
@@ -91,9 +92,9 @@ namespace Engine
 
 		//Do a big texture for all characters
 
-		int32_t charCount = s_data->last_char - s_data->first_char;
+		int64_t charCount = s_data->last_char - s_data->first_char;
 
-		uint32_t maxCharWidth = 0, maxCharHeight = 0;
+		uint64_t maxCharWidth = 0, maxCharHeight = 0;
 
 
 		for (unsigned char c = s_data->first_char; c <= s_data->last_char; c++)
@@ -103,8 +104,8 @@ namespace Engine
 			else
 			{
 				//Get glyph data
-				uint32_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
-				uint32_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
+				uint64_t glyphWidth = s_data->fontFace->glyph->bitmap.width;
+				uint64_t glyphHeight = s_data->fontFace->glyph->bitmap.rows;
 
 				maxCharWidth = std::max(maxCharWidth, glyphWidth);
 				maxCharHeight = std::max(maxCharHeight, glyphHeight);
@@ -113,7 +114,7 @@ namespace Engine
 
 		maxCharWidth += 10;
 		maxCharHeight += 10;
-		uint32_t textureWidth =maxCharWidth*10, textureHeight=maxCharHeight*10;
+		uint64_t textureWidth =maxCharWidth*10, textureHeight=maxCharHeight*10;
 
 
 		unsigned char* texData = static_cast<unsigned char*>(malloc(textureWidth * textureHeight * 4 * sizeof(unsigned char)));

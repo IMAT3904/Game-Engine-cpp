@@ -17,14 +17,19 @@ namespace Engine
 		view = glm::mat4(1.0f);
 		projection = glm::mat4(1.0f);
 		firstClick = false;
+		CalculateProjection(60.0f, 1.f, 100.f);
 	}
-	void Camera::Matrix(float FOVdeg, float nearPlane, float farPlane)
+	void Camera::CalculateProjection(float FOVdeg, float nearPlane, float farPlane)
+	{
+		projection = glm::perspective(glm::radians(FOVdeg), float(width / height), nearPlane, farPlane);
+	}
+	void Camera::CalculateViewMatrix()
 	{
 		view = glm::lookAt(position, position + orientation, upVector);
-		projection = glm::perspective(glm::radians(FOVdeg), float(width / height), nearPlane, farPlane);
 	}
 	void Camera::Input(float deltaTime)
 	{
+		CalculateViewMatrix();
 		if (InputPoller::isKeyPressed(NG_KEY_W))
 		{
 			position += speed * orientation * deltaTime;

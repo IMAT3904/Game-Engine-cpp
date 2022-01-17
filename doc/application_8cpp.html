@@ -44,20 +44,53 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">application.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="engine__pch_8h_source.html">engine_pch.h</a>&quot;</code><br />
+<code>#include &lt;glad/glad.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="application_8h_source.html">core/application.h</a>&quot;</code><br />
+<code>#include &lt;glm/gtc/matrix_transform.hpp&gt;</code><br />
+<code>#include &lt;glm/gtc/type_ptr.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="index_buffer_8h_source.html">rendering/indexBuffer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="shader_8h_source.html">rendering/shader.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="texture_8h_source.html">rendering/texture.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="vertex_buffer_8h_source.html">rendering/vertexBuffer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="vertex_array_8h_source.html">rendering/vertexArray.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="sub_texture_8h_source.html">rendering/subTexture.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_renderer3_d_8h_source.html">rendering/Renderer3D.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_renderer2_d_8h_source.html">rendering/Renderer2D.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="uniform_buffer_8h_source.html">rendering/uniformBuffer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="camera_8h_source.html">rendering/camera.h</a>&quot;</code><br />
 </div>
 <p><a href="application_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_engine_1_1_t_p_vertex.html">Engine::TPVertex</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_engine_1_1_t_p_vertex_normalised.html">Engine::TPVertexNormalised</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_engine_1_1_t_p_vertex_normalised_tint.html">Engine::TPVertexNormalisedTint</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespace_engine"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine.html">Engine</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a2478eca1a653ea28ebd340ddcb41ae5b"><td class="memItemLeft" align="right" valign="top">std::array&lt; int16_t, 3 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine.html#a2478eca1a653ea28ebd340ddcb41ae5b">Engine::normalise</a> (const glm::vec3 &amp;normal)</td></tr>
+<tr class="separator:a2478eca1a653ea28ebd340ddcb41ae5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90ad58f5b3d0e3eba53e2ef070c55b80"><td class="memItemLeft" align="right" valign="top">std::array&lt; int16_t, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine.html#a90ad58f5b3d0e3eba53e2ef070c55b80">Engine::normalise</a> (const glm::vec2 &amp;uv)</td></tr>
+<tr class="separator:a90ad58f5b3d0e3eba53e2ef070c55b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27781d8f63a651b296a1fb79ae854d37"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_engine.html#a27781d8f63a651b296a1fb79ae854d37">Engine::pack</a> (const glm::vec3 &amp;colour)</td></tr>
+<tr class="separator:a27781d8f63a651b296a1fb79ae854d37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 <!-- start footer part -->

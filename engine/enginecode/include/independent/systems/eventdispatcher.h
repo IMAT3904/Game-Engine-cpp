@@ -9,11 +9,13 @@
 #endif // NG_PLATFORM_WINDOWS
 
 
-/**
-\class Event dispatcher
-*/
+
 namespace Engine 
 {
+	/**
+	\class EventDispatcher
+	\brief Dispatch all event application.
+	*/
 	class EventDispatcher
 	{
 		template<typename T>

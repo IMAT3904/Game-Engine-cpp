@@ -6,15 +6,15 @@
 namespace Engine
 {
 	/** \class IndexBuffer
-	* API diagnostic index bufffer
+	* \brief  API agnostic index bufffer
 	*/
 	class IndexBuffer
 	{
 	public:
-		virtual ~IndexBuffer() = default;
-		virtual inline uint32_t getID() const = 0;
-		virtual inline uint32_t getCount() const = 0;
+		virtual ~IndexBuffer() = default; //!< Destructor 
+		virtual inline uint32_t getID() const = 0; //!< Get buffer ID
+		virtual inline uint32_t getCount() const = 0; //!< Get count.
 
-		static IndexBuffer* create(uint32_t* indicies, uint32_t count);
+		static IndexBuffer* create(uint32_t* indicies, uint32_t count); //!< Create buffer
 	};
 }

@@ -6,14 +6,17 @@
 namespace Engine
 {
 	class RendererCommon;
+	/** \class RenderCommand
+	* \brief API agnostic class for render commands.
+	*/
 	class RenderCommand
 	{
 	public:
-		enum class Commands{clearDepthBuffer, clearColourBuffer, clearColurAndDepthBuffer,setClearColour,enableDepthTest,disableDepthTest,enableBlending};
+		enum class Commands{clearDepthBuffer, clearColourBuffer, clearColurAndDepthBuffer,setClearColour,enableDepthTest,disableDepthTest,enableBlending}; //!< List of aviable render commands.
 	private:
 		std::function<void(void)> m_action; //!< Action of the render command
-		friend class RenderCommandFactory;
-		friend class RendererCommon;
+		friend class RenderCommandFactory; //!< Allow acess to RenderCommandFactory class.
+		friend class RendererCommon; //!< Allow acess to RendererCommon class.
 	};
 
 	class RenderCommandFactory
@@ -64,13 +67,13 @@ namespace Engine
 			}
 		}
 	private:
-		static std::function<void(void)> clearDepthBufferCommand();
-		static std::function<void(void)> clearColourBufferCommand();
-		static std::function<void(void)> enableDepthTestCommand();
-		static std::function<void(void)> disableDepthTestCommand();
-		static std::function<void(void)> enableBlendingCommand();
-		static std::function<void(void)> getClearColourAndDepthBufferCommand();
-		static std::function<void(void)> getsetColourCommand(float r, float g, float b, float a);
+		static std::function<void(void)> clearDepthBufferCommand(); //!< Clear Depth buffer.
+		static std::function<void(void)> clearColourBufferCommand(); //!< Clear Colour buffer.
+		static std::function<void(void)> enableDepthTestCommand(); //!< Enable depth testing. 
+		static std::function<void(void)> disableDepthTestCommand(); //!< Disable Depth testing.
+		static std::function<void(void)> enableBlendingCommand(); //!< Enable blending.
+		static std::function<void(void)> getClearColourAndDepthBufferCommand(); //!< Get clear colour and buffer command.
+		static std::function<void(void)> getsetColourCommand(float r, float g, float b, float a); //!< Get set colour command 
 		template<typename G,size_t I, typename... Ts>
 		typename std::enable_if<I >=sizeof...(Ts),void>::type
 		static getValue(G& result, std::tuple<Ts...> tup)

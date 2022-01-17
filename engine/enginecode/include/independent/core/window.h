@@ -9,7 +9,7 @@ namespace Engine
 {
 
 	/** \class Window
-	* Abstract windows base class.
+	\brief Abstract windows base class.
 	*/
 
 	struct WindowProperties
@@ -19,7 +19,6 @@ namespace Engine
 		uint32_t height;
 		bool isFullScreen;
 		bool isVsync;
-
 		WindowProperties(char* title = "My window", unsigned int width = 800, unsigned int height = 600, bool fullscreen = false, bool vsync = false) : title(title), width(width), height(height),isVsync(vsync), isFullScreen(fullscreen) {};
 	};
 

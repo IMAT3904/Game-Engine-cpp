@@ -3,6 +3,10 @@
 
 namespace Engine
 {
+	/**
+	\class GraphicsContext
+	\brief Virtual class of the Graphics Context. 
+	*/
 	class GraphicsContext
 	{
 	public:
